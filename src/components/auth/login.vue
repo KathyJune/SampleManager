@@ -57,14 +57,16 @@ export default {
         if (response && response.data.token) {
           let token = response.data.token
           setToken(token)
-          this.getUserInfo(login.userName)
+          localSave('user', JSON.stringify(response.data.data))
+          localSave('role', JSON.stringify(response.data.role))
+          this.redirectTo()
           // this.$socket.emit('login', {
           //   token,
           //   user: login.userName
           // })
         } else {
           // vm.createCode()
-          this.$notify.error({title: '错误', message: response.data.msg})
+          this.$notify.error({ title: '错误', message: response.data.msg })
         }
       }).catch((response) => {
         // console.log(response)
@@ -99,31 +101,13 @@ export default {
       }
       return true
     },
-    getUserInfo (user) {
+    redirectTo () {
       let redirect = decodeURIComponent(this.$route.query.redirect || '/')
       if (redirect !== '/') {
-        this.$router.push({path: redirect})
+        this.$router.push({ path: redirect })
       } else {
         this.$router.push('/home')
       }
-
-      // let url = this.apiUrl.auth.getUserInfo + '/' + user
-      // this.$http.get(url).then((response) => {
-      //   if (response && response.data.code === 200) {
-      //     const login = response.data.data
-      //     localSave('login', JSON.stringify(login))
-      //     let redirect = decodeURIComponent(this.$route.query.redirect || '/')
-      //     if (redirect !== '/') {
-      //       this.$router.push({path: redirect})
-      //     } else {
-      //       this.$router.push('/home')
-      //     }
-      //   } else {
-      //     this.$notify.error({ title: '错误', message: response.message })
-      //   }
-      // }).catch((response) => {
-      //   // console.log(response)
-      // })
     }
   },
   data () {

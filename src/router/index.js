@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import spaceView from 'src/page/spaceView'
-import megreView from 'src/page/megreView'
 import { getToken, canTurnTo } from '@/libs/util'
 import config from '@/config'
 Vue.use(Router)
@@ -13,76 +11,43 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/home'
     },
     {
       path: '/home',
-      redirect: '/dashboard',
+      redirect: '/home/sampleManager',
       name: 'Home',
-      meta: { label: '首页' },
+      meta: {
+        access: ['admin'],
+        label: '首页'
+      },
       component: () => import(/* webpackChunkName: "page" */ 'src/components/containers/DefaultContainer'),
       children: [
         {
-          path: '/data',
-          component: {
-            render (c) {
-              return c('router-view')
-            }
+          path: 'sampleAdmin',
+          name: 'sampleAdmin',
+          meta: {
+            access: ['admin'],
+            label: '样本管理'
           },
-          children: [
-            {
-              path: 'sampleAdmin',
-              name: 'sampleAdmin',
-              meta: { label: '样本管理' },
-              component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleAdmin'),
-              beforeLeave: (to, from, next) => {
-                console.log(to, this)
-                this.refreshTimer = undefined
-                next()
-              }
-            },
-            {
-              path: 'sampleManager',
-              name: 'sampleManager',
-              meta: { label: '样本管理1' },
-              component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleManager'),
-              beforeLeave: (to, from, next) => {
-                console.log(to, this)
-                this.refreshTimer = undefined
-                next()
-              }
-            }
-          ]
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleAdmin'),
+          beforeLeave: (to, from, next) => {
+            this.refreshTimer = undefined
+            next()
+          }
         },
         {
-          path: '/sys',
-          component: () => import(/* webpackChunkName: "sys" */ 'src/page/sys'),
-          children: [
-            {
-              path: 'upload',
-              name: 'upload',
-              meta: { label: '上传记录' },
-              component: () => import(/* webpackChunkName: "sys" */ 'src/page/upload')
-            },
-            {
-              path: 'messageManage',
-              name: 'messageManage',
-              meta: { label: '消息管理' },
-              component: () => import(/* webpackChunkName: "sys" */ 'src/page/message')
-            },
-            {
-              path: 'publishManage',
-              name: 'publishManage',
-              meta: { label: '发布管理' },
-              component: () => import(/* webpackChunkName: "sys" */ 'src/page/publishManage')
-            },
-            {
-              path: 'deleteManage',
-              name: 'deleteManage',
-              meta: { label: '删除管理' },
-              component: () => import(/* webpackChunkName: "sys" */ 'src/page/deleteManage')
-            }
-          ]
+          path: 'sampleManager',
+          name: 'sampleManager',
+          meta: {
+            access: ['admin'],
+            label: '样本管理1'
+          },
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleManager'),
+          beforeLeave: (to, from, next) => {
+            this.refreshTimer = undefined
+            next()
+          }
         }
       ]
     },
@@ -97,18 +62,18 @@ const router = new Router({
         {
           path: '404',
           name: 'Page404',
-          component: () => import(/* webpackChunkName: "page" */ 'src/components/auth/login')
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/error-page/404.vue')
         },
         {
           path: '500',
           name: 'Page500',
-          component: () => import(/* webpackChunkName: "page" */ 'src/components/auth/login')
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/error-page/500.vue')
         },
         {
-          path: '/login',
-          name: 'Login',
-          component: () => import(/* webpackChunkName: "page" */ 'src/components/auth/login')
-        },
+          path: '401',
+          name: 'Page401',
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/error-page/401.vue')
+        }
         // {
         //   path: 'register',
         //   name: 'Register',
@@ -119,27 +84,22 @@ const router = new Router({
         //   name: 'spaceView',
         //   component: spaceView
         // },
-        {
-          path: '/spaceView/:id',
-          name: 'spaceView',
-          component: spaceView
-        },
-        {
-          path: '/megreView',
-          name: 'megreView',
-          component: megreView
-        }
       ]
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import(/* webpackChunkName: "page" */ 'src/components/auth/login')
     }
   ]
 })
 const LOGIN_PAGE_NAME = 'Login'
 const turnTo = (to, access, next) => {
   if (canTurnTo(to.name, access, router.options.routes)) next() // 有权限，可访问
-  else next({ replace: true, name: 'Page404' }) // 无权限，重定向到401页面
+  else next({ replace: true, name: 'Page401' }) // 无权限，重定向到401页面
 }
 router.beforeEach((to, from, next) => {
-  const token = 'kasjfiwe' // getToken()
+  const token = getToken()
   if (!token && to.name !== LOGIN_PAGE_NAME) {
     // 未登录且要跳转的页面不是登录页
     next({
@@ -154,7 +114,7 @@ router.beforeEach((to, from, next) => {
       name: homeName // 跳转到homeName页
     })
   } else {
-    turnTo(to, [], next)
+    turnTo(to, ['admin'], next)
   }
 })
 
