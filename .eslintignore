@@ -1,0 +1,8 @@
+/build/
+/config/
+/dist/
+/*.js
+/test/unit/coverage/
+/src/plugin/leaflet-cache/
+/src/plugin/leaflet-graphicScale/
+/src/plugin/leaflet-pm/

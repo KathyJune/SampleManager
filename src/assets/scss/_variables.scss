@@ -1,0 +1,37 @@
+// Variable overrides
+$gray-color: #999999;
+$font-size: 16px;
+$font-size-mini:13px;
+$border-radius: 2px;
+$hover-background-color: rgb(245, 245, 245);
+$white-color: #ffffff;
+$primary-color: #45b984;
+$disabled-color: '#bbbbbb';
+$gray4-color: #f9f9f9;
+$date-picker-cells-width: 196px;
+$gray2-color: #eeeeee;
+$gray1-color: #d3d3d3;
+$link-color: $primary-color;
+
+// Input
+$input-height : 30px;
+
+//border
+$border-color: $gray2-color;
+$border: 1px solid $gray2-color;
+
+//disabled
+$disabled-cursor: not-allowed;
+$disabled-color: $gray-color;
+$disabled-border-color: $gray1-color;
+$disabled-background-color: $gray4-color;
+
+//radius
+$border-radius : 4px;
+$btn-border-radius: 4px;
+
+$animation-time: .3s;
+$transition-time: .2s;
+$active-blue:#409eff;
+$sidebar-width: 330px;
+$label-text-color: #000000a7
