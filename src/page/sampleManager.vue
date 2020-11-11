@@ -189,7 +189,7 @@ export default {
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
       let option00 = {
         'classType': [1],
-        'source': ['DistrictofColumbia']
+        'source': ['DistrictofColumbia'],
         // 'geom': JSON.stringify(this.resultLayer.toGeoJSON().geometry),
         // 'temporal': '1604372920918',
       }

@@ -1,9 +1,9 @@
 <template>
   <div>
     <AppSidebar fixed>
-      <div class="tool-expand">
-        <button class="sidebar-minimizer" type="button" @click="onClick()"></button>
-      </div>
+      <!--<div class="tool-expand">-->
+        <!--<button class="sidebar-minimizer" type="button" @click="onClick()"></button>-->
+      <!--</div>-->
       <nav class="sidebar-nav">
           <VuePerfectScrollbar class="scroll-area" :settings="psSettings" @ps-scroll-y="scrollHandle">
             <el-tabs type="card" v-model="activeName" @tab-click="handleClick">
