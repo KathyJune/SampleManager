@@ -146,7 +146,7 @@
                       </div>
                     </div>
                     <div class="start-query">
-                      <el-button type="success" @click="startIndexing">开始检索</el-button>
+                      <el-button type="success" @click="startQuery">开始检索</el-button>
                     </div>
                   </div>
                   <div class="section">
@@ -222,7 +222,7 @@
 </template>
 <script>
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
-import {Sidebar as AppSidebar} from '@coreui/vue'
+import { Sidebar as AppSidebar } from '@coreui/vue'
 import { json } from 'd3-fetch'
 export default {
   name: 'side-nav',
@@ -242,7 +242,7 @@ export default {
   },
   data () {
     return {
-      dataSourceCheck:[],
+      dataSourceCheck: [],
       dateRange: '',
       disabledTree: [],
       newSetName: '',
@@ -251,7 +251,6 @@ export default {
       ShowAppendDialog: false,
       ShowCreateDialog: false,
       showTable: false,
-      linking: false,
       data: [{
         id: 1,
         name: '我的分类体系',
@@ -267,95 +266,11 @@ export default {
             name: '乔木林地',
             count: '瓦片：121777,  图斑：128347',
             place: [0, 0, 0]
-          }, {
-            id: 5,
-            name: '红树林地',
-            count: '瓦片：98732,  图斑：560128',
-            place: [0, 0, 1]
           }]
         }]
       }],
-      data1: [{
-        id: 1,
-        name: '分类体系1',
-        code: '01',
-        children: [{
-          id: 2,
-          name: '耕地',
-          count: '瓦片：346777,  图斑：2898347',
-          code: '0101',
-          children: [{
-            id: 3,
-            name: '水田',
-            count: '瓦片：121777,  图斑：128347',
-            code: '010101'
-          }, {
-            id: 4,
-            name: '水浇地',
-            count: '瓦片：123347,  图斑：98347',
-            code: '010102'
-          }, {
-            id: 5,
-            name: '旱地',
-            count: '瓦片：98732,  图斑：560128',
-            code: '010103'
-          }]
-        }, {
-          id: 6,
-          name: '园地',
-          count: '瓦片：762354,  9124876',
-          code: '0102',
-          children: [{
-            id: 7,
-            name: '果园',
-            count: '瓦片：87164,  图斑：98237',
-            code: '010201'
-          }, {
-            id: 8,
-            name: '茶园',
-            count: '瓦片：12827,  图斑：111247',
-            code: '010202'
-          }, {
-            id: 9,
-            name: '橡胶园',
-            count: '瓦片：81765,  图斑：90001',
-            code: '010203'
-          }, {
-            id: 10,
-            name: '其他园地',
-            count: '瓦片：81765,  图斑：90001',
-            code: '010204'
-          }]
-        }]
-      }, {
-        id: 13,
-        name: '分类体系2',
-        count: '瓦片：121777,  图斑：128347',
-        code: '02',
-        children: [{
-          id: 11,
-          name: '农作物',
-          count: '瓦片：121777,  图斑：128347',
-          code: '0201'
-        }, {
-          id: 12,
-          name: '林地',
-          count: '瓦片：121777,  图斑：128347',
-          code: '0202'
-        }]
-      }],
-      defaultProps1: {
-        children: 'children',
-        label: 'label'
-      },
       spatialQuerryMethod: '行政区划',
-      running: false,
-      selectedAl: null,
-      selectedData: null,
-      selectedArea: ['湖北省', '孝感市', '应城市'],
       activeNames: ['2'],
-      activeNames1: ['1'],
-      navItems: [], // navItem.filter((item) => item.state < 1),
       psSettings: {
         maxScrollbarLength: 200,
         minScrollbarLength: 40,
@@ -366,22 +281,10 @@ export default {
       option: {
         user: 11
       },
-      dateBegin: '',
-      dateEnd: '',
       treeData: [],
       defaultProps: {
         children: 'children',
         label: 'title'
-      },
-      areaProps: {
-        children: 'children',
-        label: 'NAME',
-        isLeaf: 'CODE'
-      },
-      queryType: true,
-      labelTxt: {
-        dataOn: '条件查询',
-        dataOff: '目录查看'
       },
       querySpace: {
         space: 0
@@ -389,25 +292,13 @@ export default {
       menuTree: [],
       treeList: [],
       activeName: 'data',
-      selectNode: '',
-      treeLoad: false,
       api: {},
-      areaName: 'administrative',
       province: '',
       provinceList: [],
       city: '',
       cityList: [],
       county: '',
-      countyList: [],
-      boundJson: {},
-      left: {
-        lat: '',
-        lng: ''
-      },
-      right: {
-        lat: '',
-        lng: ''
-      }
+      countyList: []
     }
   },
   mounted () {
@@ -502,8 +393,12 @@ export default {
       }
       scriptDom.remove()
     },
-    startIndexing () {
-      this.$emit('toggleTable')
+    startQuery () {
+      let option = {
+        dataSource: this.dataSource,
+        cats: this.dataSource
+      }
+      this.$emit('startQuery', option)
       // this.showTable = true
     },
     getSelectedTree () {

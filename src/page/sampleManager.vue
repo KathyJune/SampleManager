@@ -4,7 +4,7 @@
       <side-nav
         :classifySys="classifySys"
         :sampleSources="sampleSources"
-        @toggleTable="toggleTable"
+        @startQuery="startQuery"
         @createSampleSet="createSampleSet"
         @provinceChange="provinceChange"
         @cityChange="cityChange"
@@ -186,6 +186,7 @@ export default {
       })
     },
     startQuery () {
+      this.showTable = true
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
       let option00 = {
         'classType': [1],
@@ -582,10 +583,6 @@ export default {
           that.setDataStatus(i, keys)
         }
       }
-    },
-    toggleTable () {
-      this.showTable = true
-      this.startQuery()
     }
   },
   data () {
