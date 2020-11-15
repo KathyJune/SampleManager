@@ -133,6 +133,9 @@ export default {
       let reg = /\d{2}-\d{2}-\d{2}/
       return str.match(reg)[0]
     },
+    /***
+     * 创建新的样本集请求
+     ***/
     createSet (option) {
       let url = this.$api.sampleSets + '/sp/sampleset'
       option.filter.classes = ['1']
@@ -166,10 +169,12 @@ export default {
       this.$http.post(url, option).then((response) => {
         debugger
         if (response && response.status === 200) {
-
         }
       })
     },
+    /***
+     *点击表中的记录，请求矢量的详细信息
+     ***/
     handleCurrentChange (val) {
       let url = this.$api.sampleDetail + '/mlsample/samples'
       this.$http.post(url, [val.id]).then((response) => {
@@ -179,18 +184,21 @@ export default {
           let Poly = L.geoJSON(polygon).addTo(this.map)
           this.map.flyToBounds(Poly.getBounds())
         } else {
-          this.$notify.error({title: '错误', message: response.message})
+          this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         console.log(response)
       })
     },
+    /***
+     * 根据检索条件分页查询样本数据列表
+     ***/
     startQuery () {
       this.showTable = true
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
       let option00 = {
         'classType': [1],
-        'source': ['DistrictofColumbia'],
+        'source': ['DistrictofColumbia']
         // 'geom': JSON.stringify(this.resultLayer.toGeoJSON().geometry),
         // 'temporal': '1604372920918',
       }
@@ -201,7 +209,7 @@ export default {
           this.totalPages = response.data.totalPages
           console.log(this.resTableList)
         } else {
-          this.$notify.error({title: '错误', message: response.message})
+          this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         console.log(response)
@@ -229,7 +237,7 @@ export default {
         if (response && response.status === 200) {
           that.sampleSources = response.data.data
         } else {
-          that.$notify.error({title: '错误', message: response.message})
+          that.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         console.log(response)
@@ -335,7 +343,7 @@ export default {
         }
       } else if (data.type && data.type === 'polygon') {
         this.polygon && this.polygon.remove()
-        this.polygon = L.polygon(data.data, {color: 'red'}).addTo(this.map)
+        this.polygon = L.polygon(data.data, { color: 'red' }).addTo(this.map)
       } else {
         if (data.wkt) {
           this.wkt = omnivore.wkt.parse(data.wkt).addTo(this.map)
@@ -347,7 +355,7 @@ export default {
           iconUrl: defaultIconUrl,
           shadowUrl: import('leaflet/dist/images/marker-shadow.png')
         })
-        this.marker = L.marker([data.location.lat, data.location.lon], {icon: defaultIcon}).addTo(this.map)
+        this.marker = L.marker([data.location.lat, data.location.lon], { icon: defaultIcon }).addTo(this.map)
           .bindPopup(data.address || data.name)
           .openPopup()
         this.map.setView([data.location.lat, data.location.lon], 14)
@@ -432,7 +440,7 @@ export default {
         }
       }
       console.log(MyKeys)
-      let data = {children: this.data1}
+      let data = { children: this.data1 }
       this.setDataStatus(data, MyKeys)
       console.log(this.data1)
       // for(let item in this.data1){
@@ -455,7 +463,7 @@ export default {
           for (let i = 0; i < catList.length; i++) {
             let item = catList[i]
             item.place = [i]
-            let option = {mainId: item.id}
+            let option = { mainId: item.id }
             requests.push(this.$http.post(url2, option))
           }
           let that = this
@@ -467,7 +475,7 @@ export default {
           })
           // this.sortCat(response.data.data.list)
         } else {
-          this.$notify.error({title: '错误', message: response.message})
+          this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         // console.log(response)
@@ -487,7 +495,7 @@ export default {
           for (let i = 0; i < catList.length; i++) {
             let item = catList[i]
             item.place = [i]
-            let option = {mainId: item.id}
+            let option = { mainId: item.id }
             requests.push(this.$http.post(url2, option))
           }
           let that = this
@@ -498,7 +506,7 @@ export default {
           })
           // this.sortCat(response.data.data.list)
         } else {
-          _this.$notify.error({title: '错误', message: response.message})
+          _this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         // console.log(response)
@@ -655,7 +663,7 @@ export default {
       //
       resTableList: [{
         classType: 1,
-        geom: {lat: 38.8797775, lon: -76.98851150000002},
+        geom: { lat: 38.8797775, lon: -76.98851150000002 },
         id: '7c7028ac36724a599760c550c1a1de0c',
         produceTime: '2020-11-03T03:08:40.831+00:00',
         source: 'DistrictofColumbia'
