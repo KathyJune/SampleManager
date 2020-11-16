@@ -422,9 +422,9 @@
     height: 26vh;
     overflow-y: scroll;
   }
-  .cat-filter::-webkit-scrollbar {
-    display: none;
-  }
+  //.cat-filter::-webkit-scrollbar {
+  //  display: none;
+  //}
   .filter-body{
     .diy-cat1{
       .custom-tree-node{
@@ -529,6 +529,8 @@
   color: #000!important;
   .sidebar {
     margin-left: -30px;
+    //position: fixed;
+    //right: 0;
   }
 }
 .scroll-area {

@@ -43,10 +43,21 @@
                 <p>标签</p>
               </div>
             </div>
-            <el-button-group>
-              <el-button type="success" @click="pageUp()" :disabled="currentPage === 0" icon="el-icon-arrow-left">上一页</el-button>
-              <el-button type="success" @click="pageDown()">下一页<i class="el-icon-arrow-right el-icon--right"></i></el-button>
-            </el-button-group>
+            <div class="block">
+              <el-pagination
+                      layout="prev, pager, next"
+                      :total="totalElements"
+                      @prev-click="pageUp()"
+                      @next-click="pageDown()"
+                      @current-change="handleCurrentPageChange"
+                      :current-page.sync="currentPage">
+              </el-pagination>
+            </div>
+            <button @click="ZoomToCurrentList">缩放到当前列表</button>
+            <!--<el-button-group>-->
+              <!--<el-button type="success" @click="pageUp()" :disabled="currentPage === 0" icon="el-icon-arrow-left">上一页</el-button>-->
+              <!--<el-button type="success" @click="pageDown()">下一页<i class="el-icon-arrow-right el-icon&#45;&#45;right"></i></el-button>-->
+            <!--</el-button-group>-->
           </div>
         </div>
       </div>
@@ -93,10 +104,11 @@ import sideNav from 'src/components/samplebar/side-nav'
 import newCat from 'src/components/samplebar/new-cat'
 import { json } from 'd3-fetch'
 import 'leaflet.pm'
-import defaultIconUrl from 'leaflet/dist/images/marker-icon.png'
+// import defaultIconUrl from 'leaflet/dist/images/marker-icon.png'
+import defaultIconUrl from '@/assets/img/avatars/admin.png'
 import omnivore from 'leaflet-omnivore'
 import { getUserId } from '@/libs/util'
-import * as esri from 'esri-leaflet'
+// import * as esri from 'esri-leaflet'
 
 const L = window.L
 export default {
@@ -134,7 +146,7 @@ export default {
       return str.match(reg)[0]
     },
     /***
-     * 创建新的样本集请求
+     * 创建 新的样本集请求
      ***/
     createSet (option) {
       let url = this.$api.sampleSets + '/sp/sampleset'
@@ -172,6 +184,10 @@ export default {
         }
       })
     },
+    handleCurrentPageChange (val) {
+      this.currentPage = val
+      this.startQuery()
+    },
     /***
      *点击表中的记录，请求矢量的详细信息
      ***/
@@ -179,10 +195,14 @@ export default {
       let url = this.$api.sampleDetail + '/mlsample/samples'
       this.$http.post(url, [val.id]).then((response) => {
         if (response && response.status === 200) {
+          this.map.removeLayer(this.listPtLayer)
           console.log(response)
           let polygon = JSON.parse(response.data.data[0].spatial)
-          let Poly = L.geoJSON(polygon).addTo(this.map)
-          this.map.flyToBounds(Poly.getBounds())
+          if (this.detailLayer) {
+            this.map.removeLayer(this.detailLayer)
+          }
+          this.detailLayer = L.geoJSON(polygon).addTo(this.map)
+          this.map.flyToBounds(this.detailLayer.getBounds())
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
@@ -204,10 +224,7 @@ export default {
       }
       this.$http.post(url00, option00).then((response) => {
         if (response && response.status === 200) {
-          console.log(response)
-          this.resTableList = response.data.data.content
-          this.totalPages = response.data.totalPages
-          console.log(this.resTableList)
+          this.renderList(response.data)
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
@@ -215,6 +232,49 @@ export default {
         console.log(response)
       })
       // let resData = []
+    },
+    renderList (data) {
+      this.resTableList = data.data.content
+      this.totalPages = data.data.totalPages
+      this.totalElements = data.data.totalElements
+      let listPtsJson = {
+        'type': 'FeatureCollection',
+        'features': []
+      }
+      for (let pt of this.resTableList) {
+        let ptLayer = {}
+        ptLayer.type = 'Feature'
+        ptLayer.geometry = {
+          type: 'Point',
+          coordinates: [pt.geom.lon, pt.geom.lat]
+        }
+        listPtsJson.features.push(ptLayer)
+      }
+      let geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: '#ff7800',
+        color: '#000',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }
+      if (this.listPtLayer) {
+        this.map.removeLayer(this.listPtLayer)
+      }
+      this.listPtLayer = L.geoJSON(listPtsJson,
+        {
+          pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions)
+          },
+          onEachFeature: function (feature, layer) {
+            // layer.bindPopup('点击进入详情')
+            layer.on('click', function () {
+              console.log(feature, layer)
+              this.handleCurrentChange()
+            })
+          }
+        }).addTo(this.map)
+      this.map.flyToBounds(this.listPtLayer.getBounds())
     },
     init () {
       this.api = this.$api.search
@@ -252,7 +312,8 @@ export default {
           zoom: 13,
           zoomControl: false
         })
-        var layer = esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        console.log(this.map.pm)
+        var layer = L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
         // this.map.addLayer(editableLayers)
         this.drawOptions = {
           snappable: true,
@@ -353,7 +414,7 @@ export default {
         }
         let defaultIcon = L.icon({
           iconUrl: defaultIconUrl,
-          shadowUrl: import('leaflet/dist/images/marker-shadow.png')
+          // shadowUrl: import('leaflet/dist/images/marker-shadow.png')
         })
         this.marker = L.marker([data.location.lat, data.location.lon], { icon: defaultIcon }).addTo(this.map)
           .bindPopup(data.address || data.name)
@@ -591,10 +652,17 @@ export default {
           that.setDataStatus(i, keys)
         }
       }
+    },
+    ZoomToCurrentList () {
+      this.map.removeLayer(this.detailLayer)
+      this.listPtLayer.addTo(this.map)
+      this.map.flyToBounds(this.listPtLayer.getBounds())
     }
   },
   data () {
     return {
+      listPtLayer: false,
+      detailLayer: false,
       renderDialog: false,
       nav: {},
       map: {},
@@ -602,6 +670,7 @@ export default {
       currentPage: 0,
       queryType: 'default',
       totalPages: 0,
+      totalElements: 0,
       perPage: 10,
       total: 0,
       wkt: undefined,

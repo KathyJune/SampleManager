@@ -46,13 +46,14 @@
 import SampleBar from 'src/components/samplebar/samplebar'
 import { BListGroup, BListGroupItem } from 'bootstrap-vue/src/components/list-group'
 import 'leaflet.pm'
-import defaultIconUrl from 'leaflet/dist/images/marker-icon.png'
+// import defaultIconUrl from 'leaflet/dist/images/marker-icon.png'
+import defaultIconUrl from '@/assets/img/avatars/admin.png'
 import omnivore from 'leaflet-omnivore'
 import { on, off } from 'src/utils/dom'
 import { thousandFomart, parseJson, formatPoint } from '../utils/factory'
 import { getUserId } from '@/libs/util'
 import TimeLine from 'src/components/timeline/timeline'
-import * as esri from 'esri-leaflet'
+// import * as esri from 'esri-leaflet'
 const L = window.L
 const acessToken = 'ade4530538c006d4b4a3ac8b9138499f'
 const colors = [
@@ -1127,7 +1128,7 @@ export default {
         }
         let defaultIcon = L.icon({
           iconUrl: defaultIconUrl,
-          shadowUrl: import('leaflet/dist/images/marker-shadow.png')
+          // shadowUrl: import('leaflet/dist/images/marker-shadow.png')
         })
         this.marker = L.marker([data.location.lat, data.location.lon], {icon: defaultIcon}).addTo(this.map)
           .bindPopup(data.address || data.name)

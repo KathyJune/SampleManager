@@ -99,10 +99,12 @@ const turnTo = (to, access, next) => {
   else next({ replace: true, name: 'Page401' }) // 无权限，重定向到401页面
 }
 router.beforeEach((to, from, next) => {
-  const token = getToken()
+  // const token = getToken()
+  let token = true
   if (!token && to.name !== LOGIN_PAGE_NAME) {
     // 未登录且要跳转的页面不是登录页
     next({
+      // name: homeName
       name: LOGIN_PAGE_NAME // 跳转到登录页
     })
   } else if (!token && to.name === LOGIN_PAGE_NAME) {
