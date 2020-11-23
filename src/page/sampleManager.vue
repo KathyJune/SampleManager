@@ -4,68 +4,26 @@
       <side-nav
         :classifySys="classifySys"
         :sampleSources="sampleSources"
-        @startQuery="startQuery"
+        @setQuery="setQuery"
         @createSampleSet="createSampleSet"
         @provinceChange="provinceChange"
         @cityChange="cityChange"
         @countyChange="countyChange">
       </side-nav>
-      <div class="res" v-if="showTable">
-        <div class="table-title">
-          检索结果
-          <svg @click="showTable=false" t="1600829712581" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3247" width="16" height="16"><path d="M722.19 731.04c-8.85 0-17.75-3.05-24.98-9.27L276.79 360.41c-16.07-13.81-17.89-38.03-4.09-54.09 13.81-16.06 38.02-17.9 54.09-4.09l420.42 361.36c16.07 13.81 17.89 38.03 4.09 54.09-7.59 8.83-18.32 13.36-29.11 13.36z" p-id="3248" fill="#ffffff"></path><path d="M301.81 731.04c-10.79 0-21.52-4.53-29.11-13.35-13.81-16.07-11.98-40.28 4.09-54.09l420.42-361.36c16.07-13.81 40.28-11.98 54.09 4.09 13.81 16.06 11.98 40.28-4.09 54.09L326.79 721.77a38.192 38.192 0 0 1-24.98 9.27z" p-id="3249" fill="#ffffff"></path></svg>
-        </div>
-        <div class="res-table">
-          <div class="res-left">
-            <el-table :data="resTableList" size="mini" height="30vh" style="width: 100%" stripe @current-change="handleCurrentChange">
-              <el-table-column label="id" width="80">
-                <template slot-scope="scope">
-                  <span>{{ cutString(scope.row.id, 3) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="classType" label="分类体系" width="90"></el-table-column>
-              <el-table-column prop="source" label="数据来源" width="150"></el-table-column>
-              <el-table-column label="生产日期">
-                <template slot-scope="scope">
-                  <span>{{ getDate(scope.row.produceTime) }}</span>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-          <div class="res-right">
-            <div class="res-cards">
-              <div class="sat res-card">
-                <img src="../assets/img/tiff03.png"/>
-                <p>影像</p>
-              </div>
-              <div class="label res-card">
-                <img src="../assets/img/tiff03.png"/>
-                <p>标签</p>
-              </div>
-            </div>
-            <div class="block">
-              <el-pagination
-                      layout="prev, pager, next"
-                      :total="totalElements"
-                      @prev-click="pageUp()"
-                      @next-click="pageDown()"
-                      @current-change="handleCurrentPageChange"
-                      :current-page.sync="currentPage">
-              </el-pagination>
-            </div>
-            <button @click="ZoomToCurrentList">缩放到当前列表</button>
-            <!--<el-button-group>-->
-              <!--<el-button type="success" @click="pageUp()" :disabled="currentPage === 0" icon="el-icon-arrow-left">上一页</el-button>-->
-              <!--<el-button type="success" @click="pageDown()">下一页<i class="el-icon-arrow-right el-icon&#45;&#45;right"></i></el-button>-->
-            <!--</el-button-group>-->
-          </div>
-        </div>
-      </div>
-      <new-cat ref="sampleDialog"
-        :tree="disabledTree"
-        v-if="renderDialog"
-        @createSet="createSet"></new-cat>
     </div>
+    <res-list
+      v-if="showTable"
+      :listData="listData"
+      :currentPage="currentPage"
+      @SelectedGeojsonChange="SelectedGeojsonChange"
+      @pageChange="pageChange"
+      @ZoomToCurrentList="ZoomToCurrentList"
+    ></res-list>
+    <new-cat ref="sampleDialog"
+             :tree="disabledTree"
+             :ShowCreateDialog="renderDialog"
+             @createSet="createSet">
+    </new-cat>
     <div class="map-tool-bar">
       <ul>
         <li :class= "{'active': drawType === 'Rectangle'}" @click="drawOpt('Rectangle')">
@@ -102,6 +60,7 @@
 <script>
 import sideNav from 'src/components/samplebar/side-nav'
 import newCat from 'src/components/samplebar/new-cat'
+import resList from 'src/components/samplebar/res-list'
 import { json } from 'd3-fetch'
 import 'leaflet.pm'
 // import defaultIconUrl from 'leaflet/dist/images/marker-icon.png'
@@ -115,13 +74,19 @@ export default {
   name: 'sampleManager',
   components: {
     sideNav,
-    newCat
+    newCat,
+    resList
   },
   mounted () {
     this.init()
     this.init1()
   },
   methods: {
+    pageChange (pageNo) {
+      console.log(pageNo)
+      this.currentPage = pageNo
+      this.startQuery()
+    },
     pageUp () {
       this.currentPage = this.currentPage - 1
       this.startQuery()
@@ -129,6 +94,72 @@ export default {
     pageDown () {
       this.currentPage = this.currentPage + 1
       this.startQuery()
+    },
+    /***
+     * 创建新的样本集请求
+     ***/
+    createSet (option) {
+      debugger
+      let url = this.$api.sampleSets + '/sp/sampleset'
+      option.filter.classes = ['1']
+      // option.taxonomy = [
+      //   {
+      //     'mid': 1,
+      //     'parentId': -1,
+      //     'label': '我的分类体系'
+      //   },
+      //   {
+      //     'mid': 2,
+      //     'parentId': 1,
+      //     'label': '林地'
+      //   },
+      //   {
+      //     'mid': 3,
+      //     'parentId': 2,
+      //     'label': '松树林',
+      //     'link': [
+      //       {
+      //         'id': 12,
+      //         'label': '松树林地',
+      //         'code': '0102'
+      //       }
+      //     ]
+      //   }
+      // ]
+      option.filter.spatial = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
+      option.filter = JSON.stringify(option.filter)
+      option.taxonomy = JSON.stringify(option.taxonomy)
+      this.$http.post(url, option).then((response) => {
+        debugger
+        if (response && response.status === 200) {
+        }
+      })
+      this.ShowCreateDialog = false
+    },
+    handleCurrentPageChange (val) {
+      this.currentPage = val
+      this.startQuery()
+    },
+    /***
+     *点击表中的记录，请求矢量的详细信息
+     ***/
+    SelectedGeojsonChange (val) {
+      let url = this.$api.sampleDetail + '/mlsample/samples'
+      this.$http.post(url, [val.id]).then((response) => {
+        if (response && response.status === 200) {
+          this.map.removeLayer(this.listPtLayer)
+          let polygon = JSON.parse(response.data.data[0].spatial)
+          if (this.detailLayer) {
+            this.map.removeLayer(this.detailLayer)
+          }
+          this.detailLayer = L.geoJSON(polygon).addTo(this.map)
+          this.map.flyToBounds(this.detailLayer.getBounds())
+        } else {
+          this.$notify.error({ title: '错误', message: response.message })
+        }
+      }).catch((response) => {
+        console.log(response)
+      })
     },
     cutString (str, len) {
       if (str.length <= len * 2) {
@@ -145,84 +176,24 @@ export default {
       let reg = /\d{2}-\d{2}-\d{2}/
       return str.match(reg)[0]
     },
-    /***
-     * 创建 新的样本集请求
-     ***/
-    createSet (option) {
-      let url = this.$api.sampleSets + '/sp/sampleset'
-      option.filter.classes = ['1']
-      option.taxonomy = [
-        {
-          'mid': 1,
-          'parentId': -1,
-          'label': '我的分类体系'
-        },
-        {
-          'mid': 2,
-          'parentId': 1,
-          'label': '林地'
-        },
-        {
-          'mid': 3,
-          'parentId': 2,
-          'label': '松树林',
-          'link': [
-            {
-              'id': 12,
-              'label': '松树林地',
-              'code': '0102'
-            }
-          ]
-        }
-      ]
-      option.filter.spatial = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
-      option.filter = JSON.stringify(option.filter)
-      option.taxonomy = JSON.stringify(option.taxonomy)
-      this.$http.post(url, option).then((response) => {
-        debugger
-        if (response && response.status === 200) {
-        }
-      })
-    },
-    handleCurrentPageChange (val) {
-      this.currentPage = val
+    setQuery (option) {
+      this.query = option
+      if (this.resultLayer.toGeoJSON) this.query.geom = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
       this.startQuery()
-    },
-    /***
-     *点击表中的记录，请求矢量的详细信息
-     ***/
-    handleCurrentChange (val) {
-      let url = this.$api.sampleDetail + '/mlsample/samples'
-      this.$http.post(url, [val.id]).then((response) => {
-        if (response && response.status === 200) {
-          this.map.removeLayer(this.listPtLayer)
-          console.log(response)
-          let polygon = JSON.parse(response.data.data[0].spatial)
-          if (this.detailLayer) {
-            this.map.removeLayer(this.detailLayer)
-          }
-          this.detailLayer = L.geoJSON(polygon).addTo(this.map)
-          this.map.flyToBounds(this.detailLayer.getBounds())
-        } else {
-          this.$notify.error({ title: '错误', message: response.message })
-        }
-      }).catch((response) => {
-        console.log(response)
-      })
     },
     /***
      * 根据检索条件分页查询样本数据列表
      ***/
     startQuery () {
-      this.showTable = true
+      // this.showTable = true
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
-      let option00 = {
-        'classType': [1],
-        'source': ['DistrictofColumbia']
-        // 'geom': JSON.stringify(this.resultLayer.toGeoJSON().geometry),
-        // 'temporal': '1604372920918',
-      }
-      this.$http.post(url00, option00).then((response) => {
+      // let option00 = {
+      //   'classType': [1],
+      //   'source': ['DistrictofColumbia'],
+      //   'geom': JSON.stringify(this.resultLayer.toGeoJSON().geometry)
+      //   // 'temporal': '1604372920918',
+      // }
+      this.$http.post(url00, this.query).then((response) => {
         if (response && response.status === 200) {
           this.renderList(response.data)
         } else {
@@ -234,6 +205,9 @@ export default {
       // let resData = []
     },
     renderList (data) {
+      console.log('aaaaaaaaaaa')
+      this.listData = data
+      this.showTable = true
       this.resTableList = data.data.content
       this.totalPages = data.data.totalPages
       this.totalElements = data.data.totalElements
@@ -248,6 +222,9 @@ export default {
           type: 'Point',
           coordinates: [pt.geom.lon, pt.geom.lat]
         }
+        ptLayer.properties = {
+          featureId: pt.id
+        }
         listPtsJson.features.push(ptLayer)
       }
       let geojsonMarkerOptions = {
@@ -261,7 +238,8 @@ export default {
       if (this.listPtLayer) {
         this.map.removeLayer(this.listPtLayer)
       }
-      this.listPtLayer = L.geoJSON(listPtsJson,
+      let that = this
+      that.listPtLayer = L.geoJSON(listPtsJson,
         {
           pointToLayer: function (feature, latlng) {
             return L.circleMarker(latlng, geojsonMarkerOptions)
@@ -270,11 +248,11 @@ export default {
             // layer.bindPopup('点击进入详情')
             layer.on('click', function () {
               console.log(feature, layer)
-              this.handleCurrentChange()
+              that.SelectedGeojsonChange({id: feature.properties.featureId})
             })
           }
-        }).addTo(this.map)
-      this.map.flyToBounds(this.listPtLayer.getBounds())
+        }).addTo(that.map)
+      that.map.flyToBounds(that.listPtLayer.getBounds())
     },
     init () {
       this.api = this.$api.search
@@ -413,7 +391,7 @@ export default {
           this.optionSpace.point = 'POINT(' + data.location.lat + ' ' + data.location.lon + ')'
         }
         let defaultIcon = L.icon({
-          iconUrl: defaultIconUrl,
+          iconUrl: defaultIconUrl
           // shadowUrl: import('leaflet/dist/images/marker-shadow.png')
         })
         this.marker = L.marker([data.location.lat, data.location.lon], { icon: defaultIcon }).addTo(this.map)
@@ -476,6 +454,7 @@ export default {
       return true
     },
     createSampleSet (tree) {
+      debugger
       console.log(tree)
       this.disabledTree = tree
       this.renderDialog = true
@@ -485,7 +464,6 @@ export default {
       this.ShowAppendDialog = true
     },
     startIndexing () {
-      this.showTable = true
       let checkedKeys = this.$refs.tree.getCheckedKeys()
       let MyKeys = []
       for (let key of checkedKeys) {
@@ -513,39 +491,39 @@ export default {
       this.api = this.$api.search
       this.rootApi = this.$api.root1
 
-      // test api
-      let url2 = 'http://127.0.0.1:7001/api/v1/common/taxology'
-      this.$http.post(url2, {}).then((response) => {
-        if (response && response.status === 200) {
-          let catList = response.data.data.list
-          // 根据分类体系的基本信息查找分类体系的具体信息
-          let url2 = this.$api.root1 + '/sp/base/taxonomy/detail/list'
-          let requests = []
-          for (let i = 0; i < catList.length; i++) {
-            let item = catList[i]
-            item.place = [i]
-            let option = { mainId: item.id }
-            requests.push(this.$http.post(url2, option))
-          }
-          let that = this
-          that.$http.all(requests).then(function (values) {
-            debugger
-            let details = []
-            for (let item of values) details.push(item.data.data.list)
-            that.sortCat(catList, details)
-          })
-          // this.sortCat(response.data.data.list)
-        } else {
-          this.$notify.error({ title: '错误', message: response.message })
-        }
-      }).catch((response) => {
-        // console.log(response)
-      })
+      // // test api
+      // let url2 = 'http://127.0.0.1:7001/api/v1/common/taxology'
+      // this.$http.post(url2, {}).then((response) => {
+      //   if (response && response.status === 200) {
+      //     let catList = response.data.data.list
+      //     // 根据分类体系的基本信息查找分类体系的具体信息
+      //     let url2 = this.$api.root1 + '/sp/base/taxonomy/detail/list'
+      //     let requests = []
+      //     for (let i = 0; i < catList.length; i++) {
+      //       let item = catList[i]
+      //       item.place = [i]
+      //       let option = { mainId: item.id }
+      //       requests.push(this.$http.post(url2, option))
+      //     }
+      //     let that = this
+      //     that.$http.all(requests).then(function (values) {
+      //       debugger
+      //       let details = []
+      //       for (let item of values) details.push(item.data.data.list)
+      //       that.sortCat(catList, details)
+      //     })
+      //     // this.sortCat(response.data.data.list)
+      //   } else {
+      //     this.$notify.error({ title: '错误', message: response.message })
+      //   }
+      // }).catch((response) => {
+      //   // console.log(response)
+      // })
 
       // test api
 
       let url = this.$api.root1 + '/sp/base/taxonomy/main/list'
-      let details = []
+      // let url = 'http://192.168.1.177:9983/sp/base/taxonomy/main/list'
       // 查找分类体系的基本信息
       this.$http.post(url, {}).then((response) => {
         if (response && response.status === 200) {
@@ -567,7 +545,7 @@ export default {
           })
           // this.sortCat(response.data.data.list)
         } else {
-          _this.$notify.error({ title: '错误', message: response.message })
+          this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         // console.log(response)
@@ -661,6 +639,7 @@ export default {
   },
   data () {
     return {
+      listData: {},
       listPtLayer: false,
       detailLayer: false,
       renderDialog: false,
@@ -671,7 +650,7 @@ export default {
       queryType: 'default',
       totalPages: 0,
       totalElements: 0,
-      perPage: 10,
+      perPage: 20,
       total: 0,
       wkt: undefined,
       collectItem: [],
@@ -738,7 +717,8 @@ export default {
         source: 'DistrictofColumbia'
       }],
       sampleSources: [],
-      optionSpace: {}
+      optionSpace: {},
+      query: {}
     }
   }
 }

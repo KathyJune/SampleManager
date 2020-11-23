@@ -74,7 +74,8 @@
           </div>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="ShowAppendDialog = false">取 消</el-button>
+          <el-button @click="linking=false; ShowCreateDialog=false">取 消</el-button>
+          <el-button v-if="linking" @click="linking=false">上一步</el-button>
           <el-button type="primary" @click="startLinking" v-if="!linking">创建对应关系</el-button>
           <el-button type="primary" @click="createSet" v-if="linking">创建样本集</el-button>
         </span>
@@ -87,7 +88,10 @@ export default {
   name: 'new-cat',
   props: {
     tree: {
-      type: Array,
+      required: true
+    },
+    ShowCreateDialog: {
+      type: Boolean,
       required: true
     }
   },
@@ -97,7 +101,6 @@ export default {
       newSetName: '',
       newSetComment: '',
       linking: false,
-      ShowCreateDialog: true,
       data1: [{
         id: 1,
         label: '分类体系1',
@@ -271,7 +274,6 @@ export default {
       let temp = this.data[0]
       for (let i = 1; i < n; i++) {
         let a = node.data.place[i]
-        let b = temp['children']
         temp = temp['children'][a]
       }
       temp['label'] = e.currentTarget.value

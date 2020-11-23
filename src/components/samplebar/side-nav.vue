@@ -116,14 +116,7 @@
                       </div>
                       <div class="filter-body">
                         <div class="date-selector">
-                          <el-date-picker
-                            v-model="dateRange"
-                            type="daterange"
-                            size="mini"
-                            style="width: 280px;"
-                            range-separator="至"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期">
+                          <el-date-picker v-model="dateRange" type="daterange" size="mini" style="width: 280px;" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
                           </el-date-picker>
                         </div>
                         <div class="existing-cat">
@@ -146,7 +139,7 @@
                       </div>
                     </div>
                     <div class="start-query">
-                      <el-button type="success" @click="startQuery">开始检索</el-button>
+                      <el-button type="success" @click="setQuery">开始检索</el-button>
                     </div>
                   </div>
                   <div class="section">
@@ -182,15 +175,6 @@
               </el-tab-pane>
               <el-tab-pane label="变化检测" name="menu">
                 <ul class="nav">
-                  <li>
-                    <div class="nav-link">
-                      <el-tree :data="menuTree" :props="defaultProps" node-key="id"
-                              :default-expanded-keys="[1]" show-checkbox ref="menu"></el-tree>
-                    </div>
-                  </li>
-                  <li class="nav-link text-center">
-                    <button class="btn btn-pill btn-block btn-primary" type="button" @click="menuQuery">查询</button>
-                  </li>
                 </ul>
               </el-tab-pane>
             </el-tabs>
@@ -215,7 +199,7 @@ export default {
       required: true
     },
     sampleSources: {
-      type: Array,
+      // type: Array,
       required: true
     }
   },
@@ -248,7 +232,7 @@ export default {
           }]
         }]
       }],
-      spatialQuerryMethod: '行政区划',
+      spatialQuerryMethod: '自定义勾画',
       activeNames: ['2'],
       psSettings: {
         maxScrollbarLength: 200,
@@ -277,7 +261,8 @@ export default {
       city: '',
       cityList: [],
       county: '',
-      countyList: []
+      countyList: [],
+      fileList: []
     }
   },
   mounted () {
@@ -372,12 +357,21 @@ export default {
       }
       scriptDom.remove()
     },
-    startQuery () {
-      let option = {
-        dataSource: this.dataSource,
-        cats: this.dataSource
+    setQuery () {
+      let option = {}
+      let nodes = this.$refs.tree.getCheckedNodes()
+      if(nodes.length !== 0) {
+        nodes = nodes.map(function (item) {
+          return item.id
+        })
+        option.classType = nodes
       }
-      this.$emit('startQuery', option)
+      if (this.dateRange.length !== 0){
+        option.startTemporal = this.dateRange[0].getTime()
+        option.endTemporal = this.dateRange[1].getTime()
+      }
+      if (this.dataSourceCheck.length !== 0) option.source = this.dataSourceCheck
+      this.$emit('setQuery', option)
       // this.showTable = true
     },
     getSelectedTree () {
@@ -410,27 +404,6 @@ export default {
       } else {
         return false
       }
-    },
-    menuQuery () {
-      // 目录树查询
-      const _this = this
-      let condition = []
-      let checkNodes = this.$refs.menu.getCheckedKeys(true)
-      checkNodes.map((item) => {
-        let _node = this.$refs.menu.getNode(item)
-        let nodePath = this.getNodeFullPath(_node, ',')
-        nodePath = nodePath.substring(1)
-        let _Path = nodePath.split(',')
-        let conditionRow = {}
-        _Path.map((v, i) => {
-          let key = _this.treeList[i].key
-          conditionRow[key] = v
-        })
-        condition.push(conditionRow)
-      })
-      this.$emit('menu-query', {
-        condition: condition
-      })
     },
     appendSampleSet () {
       this.ShowCreateDialog = false

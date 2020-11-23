@@ -42,7 +42,7 @@ module.exports = {
     port: 9620,
     proxy: {
       '/samplePreview': {
-        target: 'http://192.168.1.198:8080',
+        target: 'http://192.168.1.177:10087',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
@@ -51,7 +51,7 @@ module.exports = {
         }
       },
       '/sampleDetail': {
-        target: 'http://192.168.1.198:9019',
+        target: 'http://192.168.1.177:10086',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
@@ -60,7 +60,7 @@ module.exports = {
         }
       },
       '/sampleSets': {
-        target: 'http://192.168.1.198:9981',
+        target: 'http://192.168.1.177:9981',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
@@ -69,7 +69,7 @@ module.exports = {
         }
       },
       '/api': {
-        target: 'http://192.168.1.152:9981',
+        target: 'http://192.168.1.177:9983',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
