@@ -354,15 +354,20 @@
             border: none;
             padding: 0 5px;
           }
-          span{
-            // min-width: 200px;
-            // display: flex;
-            // flex-direction: row-reverse;
+          .selectors{
+            display: flex;
+            align-items: center;
             button{
               padding: 7px 0;
             }
             .el-cascader{
               min-width: 300px;
+            }
+            .el-color-picker{
+              margin: 0 20px;
+              .el-color-picker__trigger{
+                border: none;
+              }
             }
           }
         }

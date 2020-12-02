@@ -24,26 +24,26 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "page" */ 'src/components/containers/DefaultContainer'),
       children: [
         {
-          path: 'sampleAdmin',
-          name: 'sampleAdmin',
+          path: 'sampleManager',
+          name: 'sampleManager',
           meta: {
             access: ['admin'],
             label: '样本管理'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleAdmin'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleManager'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()
           }
         },
         {
-          path: 'sampleManager',
-          name: 'sampleManager',
+          path: 'sampleSetManager',
+          name: 'sampleSetManager',
           meta: {
             access: ['admin'],
-            label: '样本管理1'
+            label: '样本集管理'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleManager'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleSetManager'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()

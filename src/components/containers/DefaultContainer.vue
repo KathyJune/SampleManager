@@ -8,11 +8,11 @@
          遥感影像分布式管理系统
       </b-link>
       <!--<SidebarToggler class="d-md-down-none" display="lg" />-->
-      <!-- <b-navbar-nav class="d-md-down-none">
+      <b-navbar-nav class="d-md-down-none">
         <b-nav-item class="px-3" to="/dashboard">首页</b-nav-item>
         <b-nav-item class="px-3" to="/data/query" exact>数据查询</b-nav-item>
-        <b-nav-item class="px-3" to="/data/sampleAdmin" exact>样本管理</b-nav-item>
-        <b-nav-item class="px-3" to="/data/manage">目录查询</b-nav-item>
+        <b-nav-item class="px-3" to="/home/sampleManager" exact>样本管理</b-nav-item>
+        <b-nav-item class="px-3" to="/home/sampleSetManager">样本集管理</b-nav-item>
        <b-nav-item class="px-3" to="/data/analysis">数据分析</b-nav-item>
         <b-nav-item class="px-3" to="/data/dataset">我的数据</b-nav-item>
         <b-nav-item class="px-3" to="/sys/queryManage" >系统管理</b-nav-item>
@@ -20,7 +20,7 @@
           &lt;!&ndash;<b-dropdown-item to="/data/user">用户管理</b-dropdown-item>&ndash;&gt;
           <b-dropdown-item to="/data/queryManage">查询管理</b-dropdown-item>
         </b-nav-item-dropdown>
-      </b-navbar-nav> -->
+      </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <notifications></notifications>
         <b-nav-item class="d-md-down-none">

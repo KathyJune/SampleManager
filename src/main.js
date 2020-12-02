@@ -9,6 +9,7 @@ import * as factory from './utils/factory'
 import VueI18n from 'vue-i18n'
 import zh from 'src/lang/zh'
 import Api from './api/api'
+import socket from './api/socket'
 // import socket from './api/socket'
 import axios from './http'
 import VueClipboard from 'vue-clipboard2'
@@ -38,6 +39,7 @@ Vue.api = Vue.prototype.$api = Api
 Vue.factory = Vue.prototype.$factory = factory
 Vue.prototype.$L = window.L
 Vue.prototype.$bus = Bus
+Vue.prototype.$socket = socket
 
 Vue.filter('parseJson', function (content) {
   let retVal = []

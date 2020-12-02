@@ -36,7 +36,7 @@
                 :expand-on-click-node="false">
                 <span class="custom-tree-node" slot-scope="{ node, data }">
                   <input :value="node.label" @input="inputCC($event, node, data)" placeholder="请输入分类名称"/>
-                  <span>
+                  <div class="selectors">
                     <el-button
                       type="text"
                       size="mini"
@@ -60,6 +60,11 @@
                       @change=handleLinkChange(data)
                       clearable>
                     </el-cascader>
+                    <el-color-picker
+                      v-if="linkable(node, data)"
+                      size="mini"
+                      v-model="data.color">
+                    </el-color-picker>
                     <!-- <el-button
                       type="text"
                       size="mini"
@@ -67,7 +72,7 @@
                       @click="() => relate(node, data)">
                       <svg t="1601024564543" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3151" width="12" height="12"><path d="M682.666667 256h-128v81.066667h128a174.933333 174.933333 0 0 1 174.933333 174.933333 174.933333 174.933333 0 0 1-174.933333 174.933333h-128V768h128a256 256 0 0 0 256-256c0-141.653333-114.773333-256-256-256M166.4 512A174.933333 174.933333 0 0 1 341.333333 337.066667h128V256H341.333333a256 256 0 0 0-256 256 256 256 0 0 0 256 256h128v-81.066667H341.333333c-96.426667 0-174.933333-78.506667-174.933333-174.933333M341.333333 554.666667h341.333334v-85.333334H341.333333v85.333334z" fill="#333333" p-id="3152"></path></svg>
                     </el-button> -->
-                  </span>
+                  </div>
                 </span>
               </el-tree>
             </div>
@@ -193,6 +198,7 @@ export default {
             count: '瓦片：121777,  图斑：128347',
             code: 'cc',
             place: [0, 0, 0],
+            color: '#409EFF',
             link: []
           }, {
             mid: 5,
@@ -201,6 +207,7 @@ export default {
             count: '瓦片：98732,  图斑：560128',
             code: 'dd',
             place: [0, 0, 1],
+            color: '#409EFF',
             link: []
           }]
         }]

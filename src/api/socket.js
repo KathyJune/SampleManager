@@ -8,7 +8,9 @@ import Vue from 'vue'
 import ElementUI from 'element-ui'
 import io from 'socket.io-client'
 import { getToken } from '@/libs/util'
-
+const log = (s) => {
+  console.log(s)
+}
 class WebSocket {
   constructor () {
     this.socket = ''
@@ -19,11 +21,11 @@ class WebSocket {
     if (token) {
       this.token = token
       if (this.socket === '') {
-        this.socket = io('http://192.168.1.182:7001/io/', {
+        this.socket = io('http://192.168.1.132:7001/io/', {
           query: { token },
           transports: ['websocket'],
-          reconnection: true,
-          autoConnect: false
+          reconnection: false,
+          autoConnect: true
         })
       }
       if (!this.socket.connected) {
@@ -42,12 +44,18 @@ class WebSocket {
 
   init () {
     this.socket.on('connect', () => {
-      console.log('socket connected')
-    })
-    this.socket.on('notice', this.notice)
-
-    this.socket.on('reconnect', () => {
       console.log('reconnect')
+      this.socket.on('notice', this.notice)
+    })
+    this.socket.once('reconnect', () => {
+      console.log('reconnect')
+    })
+    this.socket.on('disconnecting', () => {
+      log('#disconnecting')
+    })
+
+    this.socket.on('error', () => {
+      log('#error')
     })
   }
   notice (data) {
@@ -56,4 +64,7 @@ class WebSocket {
   }
 }
 const socket = new WebSocket()
+window.onbeforeunload = function () {
+  socket.close()
+}
 export default socket
