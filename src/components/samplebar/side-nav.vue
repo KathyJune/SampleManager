@@ -147,10 +147,10 @@
                       检索结果
                     </div>
                     <div class="sample-sets section-content">
-                      <div class="sample-set">
+                      <div v-for="item in queryResList" :key="item.name" class="sample-set">
                         <div class="set-header">
                           <div class="bullet"></div>
-                          <div class="set-name">检索结果1
+                          <div class="set-name">{{item.name}}
                             <svg t="1600310034527" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6969" width="18" height="18"><path d="M689.621 512l-328.832-328.832-60.331 60.331 268.501 268.501-268.501 268.501 60.331 60.331z" p-id="6970" fill="#A0A7B4"></path></svg>
                           </div>
                           <div class="header-op">
@@ -200,6 +200,9 @@ export default {
     },
     sampleSources: {
       // type: Array,
+      required: true
+    },
+    queryResList: {
       required: true
     }
   },
@@ -293,7 +296,6 @@ export default {
       this.$emit('tab-handle', tab.name)
     },
     renderContent (h, { node, data, store }) {
-      // debugger
       return (
         <span class="custom-tree-node">
           <span>{data.name ? data.name : data.taonomyName}</span>
@@ -382,7 +384,6 @@ export default {
       }
     },
     treeSearch (node, list) {
-      // debugger
       node.label = node.name || node.taonomyName
       if (!node.children) {
         if (list.indexOf(node.id) !== -1) {

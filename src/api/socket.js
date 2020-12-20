@@ -18,6 +18,7 @@ class WebSocket {
     if (this.token) this.open(this.token)
   }
   open (token) {
+    console.log(token)
     if (token) {
       this.token = token
       if (this.socket === '') {

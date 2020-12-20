@@ -7,11 +7,14 @@
         :sampleSources="sampleSources"
         :page="page"
         @setMaking="setMaking"
-        @setPageChange="setPageChange">
+        @showSamples="showSamples"
+        @setPageChange="setPageChange"
+        @deleteSet="deleteSet">
       </set-list>
     </div>
     <sample-list
       @handleSampleChange="handleSampleChange"
+      @sampleListPageChange="sampleListPageChange"
       :slices="slices"></sample-list>
     <b-row>
       <div class="map" id='map'></div>
@@ -36,31 +39,35 @@ export default {
     // this.openSocket()
   },
   methods: {
+    // 样本列表page改变
+    sampleListPageChange (page) {
+      this.getGrids(page)
+    },
     // 被选中的样本改变之后
     handleSampleChange (item) {
       console.log(item)
       let layer = L.geoJSON(JSON.parse(item.geoJson))
       this.map.flyToBounds(layer.getBounds())
-      // 测试 把瓦片内部的所有矢量也显示出来
-      let idList = item.features.split(',')
-      console.log(idList)
-      let url = this.$api.sampleDetail + '/mlsample/samples'
-      this.$http.post(url, idList).then((response) => {
-        if (response && response.status === 200) {
-          this.rendertags(response.data.data)
-          // this.map.removeLayer(this.listPtLayer)
-          // let polygon = JSON.parse(response.data.data[0].spatial)
-          // if (this.detailLayer) {
-          //   this.map.removeLayer(this.detailLayer)
-          // }
-          // this.detailLayer = L.geoJSON(polygon).addTo(this.map)
-          // this.map.flyToBounds(this.detailLayer.getBounds())
-        } else {
-          this.$notify.error({ title: '错误', message: response.message })
-        }
-      }).catch((response) => {
-        console.log(response)
-      })
+      // // 测试 把瓦片内部的所有矢量也显示出来
+      // let idList = item.features.split(',')
+      // console.log(idList)
+      // let url = this.$api.sampleDetail + '/mlsample/samples'
+      // this.$http.post(url, idList).then((response) => {
+      //   if (response && response.status === 200) {
+      //     this.rendertags(response.data.data)
+      //     // this.map.removeLayer(this.listPtLayer)
+      //     // let polygon = JSON.parse(response.data.data[0].spatial)
+      //     // if (this.detailLayer) {
+      //     //   this.map.removeLayer(this.detailLayer)
+      //     // }
+      //     // this.detailLayer = L.geoJSON(polygon).addTo(this.map)
+      //     // this.map.flyToBounds(this.detailLayer.getBounds())
+      //   } else {
+      //     this.$notify.error({ title: '错误', message: response.message })
+      //   }
+      // }).catch((response) => {
+      //   console.log(response)
+      // })
     },
     rendertags (tags) {
       let recs = {
@@ -75,30 +82,6 @@ export default {
       // this.map.flyToBounds(rectsLayer.getBounds())
     },
     setMaking (item) {
-      // 如果是id为4的记录
-      if (item.id === 4) {
-        // 获取元数据详情
-        // let url1 = this.$api.sampleSets + '/sp/sampleset/' + item.id
-        // this.$http.get(url1).then((response) => {
-        //   if (response && response.status === 200) {
-        //     debugger
-        //   }
-        // })
-        // 获取网格
-        let url2 = this.$api.sampleSets + '/sp/sampleset/grids'
-        let option2 = {
-          page: 0,
-          setId: 4,
-          size: 10
-        }
-        this.$http.post(url2, option2).then((response) => {
-          if (response && response.status === 200) {
-            this.slices = response.data.data.list
-            this.renderSlices()
-          }
-        })
-        return
-      }
       let option = {
         command: 1, // 1表示开始制作，0表示终止制作
         setId: item.id
@@ -106,9 +89,37 @@ export default {
       let url = this.$api.sampleSets + '/sp/sampleset/operation'
       this.$http.post(url, option).then((response) => {
         if (response && response.status === 200) {
-          this.openSocket()
+          // this.openSocket()
         }
       })
+    },
+    deleteSet (item) {
+      let url = this.$api.sampleSets + '/sp/sampleset/' + item.id
+      this.$http.delete(url).then((response) => {
+        if (response && response.status === 200) {
+          this.slices = response.data.data
+          this.renderSlices()
+        }
+      })
+      this.getSets()
+    },
+    getGrids (page) {
+      let url2 = this.$api.sampleSets + '/sp/sampleset/grids'
+      let option2 = {
+        page: page,
+        setId: this.selectedSetId,
+        size: 10
+      }
+      this.$http.post(url2, option2).then((response) => {
+        if (response && response.status === 200) {
+          this.slices = response.data.data
+          this.renderSlices()
+        }
+      })
+    },
+    showSamples (item) {
+      this.selectedSetId = item.id
+      this.getGrids(0)
     },
     renderSlices () {
       console.log(this.slices)
@@ -116,28 +127,13 @@ export default {
         type: 'FeatureCollection',
         features: []
       }
-      for (let item of this.slices) {
+      for (let item of this.slices.list) {
         recs.features.push({ geometry: JSON.parse(item.geoJson), type: 'Feature' })
       }
       console.log(recs)
-      let rectsLayer = L.geoJSON(recs).addTo(this.map)
-      this.map.flyToBounds(rectsLayer.getBounds())
-    },
-    openSocket () {
-      if (this.$socket.socket.connected) {
-        this.$socket.socket.on('percent', this.showPercent)
-      }
-    },
-    showPercent (message) {
-      let _percent = JSON.parse(message)
-      console.log(_percent)
-      for (let item of this.sampleSets) {
-        if (item.id === _percent.projectId) {
-          item.state = _percent.percent
-        }
-      }
-      // {"stage":"test","now":45,"sum":100,"percent":0.0,"projectId":1
-      // this.list[0].progress = _percent.percent
+      if (this.rectanglesLayer) this.map.removeLayer(this.rectanglesLayer)
+      this.rectanglesLayer = L.geoJSON(recs).addTo(this.map)
+      this.map.flyToBounds(this.rectanglesLayer.getBounds())
     },
     pageChange (pageNo) {
       console.log(pageNo)
@@ -266,7 +262,7 @@ export default {
       const _this = this
       try {
         _this.map = L.map('map', {
-          center: [38.89753, -77.036588],
+          center: [28.095001, 112.93808],
           zoom: 13,
           zoomControl: false
         })
@@ -287,7 +283,8 @@ export default {
         currentPage: 1,
         total: 0
       },
-      slices: [],
+      rectanglesLayer: false,
+      slices: false,
       sampleSets: [],
       listData: {},
       listPtLayer: false,
@@ -324,7 +321,8 @@ export default {
       }],
       sampleSources: [],
       optionSpace: {},
-      query: {}
+      query: {},
+      selectedSetId: -1
     }
   }
 }

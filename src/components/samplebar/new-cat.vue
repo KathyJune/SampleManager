@@ -3,14 +3,15 @@
       <el-dialog
         title="创建样本集"
         :visible.sync="ShowCreateDialog"
-        width="45%"
+        class="d-dialog"
+        width="800px"
         :before-close="handleClose">
         <div class="input-form">
           <div class="input-form-item">
             <label>样本集名称: </label>
             <el-input
               size="small"
-              placeholder="请输入新样本集名称"
+              placeholder="输入样本集名称"
               v-model="newSetName">
             </el-input>
           </div>
@@ -18,9 +19,20 @@
             <label>备注: </label>
             <el-input
               size="small"
-              placeholder="请输入新样本集备注"
+              placeholder="输入样本集备注"
               v-model="newSetComment">
             </el-input>
+          </div>
+          <div class="input-form-item">
+            <label>缩放级别</label>
+            <el-select size="small" v-model="newSetLevel" placeholder="请选择">
+              <el-option
+                v-for="item in zoomLevel"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
           </div>
         </div>
         <div class="transfer">
@@ -52,12 +64,13 @@
                       <svg t="1600684224989" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4941" width="12" height="12"><path d="M795.648 874.496c0 33.792-27.648 61.44-61.44 61.44h-440.32c-33.792 0-61.44-27.648-61.44-61.44V226.304h562.176v648.192z m-439.296-757.76c0-3.072 1.024-6.144 3.072-8.192 2.048-2.048 5.12-3.072 8.192-3.072h292.864c7.168 0 12.288 5.12 12.288 12.288v36.864h-317.44v-37.888z m622.592 35.84H747.52v-36.864C747.52 68.608 708.608 30.72 661.504 30.72H368.64c-47.104 0-86.016 37.888-86.016 86.016V153.6H50.176c-13.312 0-25.6 7.168-31.744 18.432-6.144 11.264-6.144 25.6 0 36.864s18.432 18.432 31.744 18.432h109.568v648.192c0 73.728 60.416 134.144 134.144 134.144h440.32c73.728 0 134.144-60.416 134.144-134.144V226.304h109.568c20.48 0 36.864-16.384 36.864-36.864 1.024-20.48-15.36-36.864-35.84-36.864zM515.072 825.344c20.48 0 36.864-16.384 36.864-36.864V397.312c0-13.312-7.168-25.6-18.432-31.744-11.264-6.144-25.6-6.144-36.864 0s-18.432 18.432-18.432 31.744V788.48c0 20.48 16.384 36.864 36.864 36.864m-171.008 0c10.24 0 19.456-4.096 25.6-10.24 7.168-7.168 10.24-16.384 10.24-25.6V397.312c0-13.312-7.168-25.6-18.432-31.744-11.264-6.144-25.6-6.144-36.864 0s-18.432 18.432-18.432 31.744V788.48c1.024 20.48 17.408 36.864 37.888 36.864m342.016 0c20.48 0 36.864-16.384 36.864-36.864V397.312c0-13.312-7.168-25.6-18.432-31.744-11.264-6.144-25.6-6.144-36.864 0s-18.432 18.432-18.432 31.744V788.48c0 20.48 16.384 36.864 36.864 36.864" fill="#333333" p-id="4942"></path></svg>
                     </el-button>
                     <el-cascader
-                      :ref="data.code"
+                      :ref="data.mid"
                       size="mini"
                       :options="tree"
                       :props="props"
                       v-if="linkable(node, data)"
                       @change=handleLinkChange(data)
+                      @remove-tag="removeLink(data)"
                       clearable>
                     </el-cascader>
                     <el-color-picker
@@ -65,13 +78,6 @@
                       size="mini"
                       v-model="data.color">
                     </el-color-picker>
-                    <!-- <el-button
-                      type="text"
-                      size="mini"
-                      v-if="(!node.disabled)&(linking)"
-                      @click="() => relate(node, data)">
-                      <svg t="1601024564543" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3151" width="12" height="12"><path d="M682.666667 256h-128v81.066667h128a174.933333 174.933333 0 0 1 174.933333 174.933333 174.933333 174.933333 0 0 1-174.933333 174.933333h-128V768h128a256 256 0 0 0 256-256c0-141.653333-114.773333-256-256-256M166.4 512A174.933333 174.933333 0 0 1 341.333333 337.066667h128V256H341.333333a256 256 0 0 0-256 256 256 256 0 0 0 256 256h128v-81.066667H341.333333c-96.426667 0-174.933333-78.506667-174.933333-174.933333M341.333333 554.666667h341.333334v-85.333334H341.333333v85.333334z" fill="#333333" p-id="3152"></path></svg>
-                    </el-button> -->
                   </div>
                 </span>
               </el-tree>
@@ -102,10 +108,13 @@ export default {
   },
   data () {
     return {
+      linkedIds: [],
       props: { multiple: true },
       newSetName: '',
       newSetComment: '',
+      newSetLevel: 16,
       linking: false,
+      zoomLevel: [15, 16, 17, 18, 19, 20],
       data1: [{
         id: 1,
         label: '分类体系1',
@@ -182,10 +191,10 @@ export default {
         place: [0],
         disabled: true,
         link: [],
-        // parentId: -1,
+        parentId: -1,
         children: [{
           mid: 2,
-          // parentId: 1,
+          parentId: 1,
           label: '林地',
           code: 'bb',
           count: '瓦片：346777,  图斑：2898347',
@@ -193,7 +202,7 @@ export default {
           link: [],
           children: [{
             mid: 3,
-            // parentId: 2,
+            parentId: 2,
             label: '乔木林地',
             count: '瓦片：121777,  图斑：128347',
             code: 'cc',
@@ -202,7 +211,7 @@ export default {
             link: []
           }, {
             mid: 5,
-            // parentId: 2,
+            parentId: 2,
             label: '红树林地',
             count: '瓦片：98732,  图斑：560128',
             code: 'dd',
@@ -234,16 +243,28 @@ export default {
     rrequest () {
       this.TreeToList(this.data[0], -1)
     },
-    handleLinkChange (data) {
+    removeLink (data) {
       // debugger
-      // data.label = 'xixiiii'
-      let refName = data.code
-      let linkedNodes = this.$refs[refName].getCheckedNodes()
+      // let removedId = this.linkedIds.pop()
+      // for (let i=0; i<this.linkedIds.length; i++) {
+      //   if (this.linkedIds[i] === removedId) {
+      //     this.linkedIds.splice(i, 1)
+      //     return
+      //   }
+      // }
+    },
+    handleLinkChange (data) {
+      let that = this
+      let refName = data.mid
+      let linkedNodes = that.$refs[refName].getCheckedNodes()
       let linkedNodes1 = linkedNodes.filter(function (n) {
         return n.children.length === 0
       }).map(function (m) {
         return m.data
       })
+      // for (let nn of linkedNodes1) {
+      //   that.linkedIds.push(nn.id)
+      // }
       data.link = linkedNodes1
     },
     handleClose (done) {
@@ -266,9 +287,10 @@ export default {
       return true
     },
     append (node, data) {
+      // debugger
       let place = data.place
-      place.push(node.childNodes.length)
-      const newChild = { id: id++, label: 'testtest', children: [], 'place': place }
+      let pplace = place.concat([node.childNodes.length])
+      const newChild = { mid: id++, label: 'testtest', 'place': pplace, 'parentId': data.mid }
       if (!data.children) {
         this.$set(data, 'children', [])
       }
@@ -276,6 +298,7 @@ export default {
       console.log(this.data)
     },
     inputCC (e, node, value) {
+      // debugger
       // console.log(e)
       let n = node.data.place.length
       let temp = this.data[0]
@@ -286,18 +309,46 @@ export default {
       temp['label'] = e.currentTarget.value
       console.log(this.data)
     },
+    getlinkedIds (node) {
+      if (node.children && node.children.length !== 0) {
+        for (let cNode of node.children) {
+          this.getlinkedIds(cNode)
+        }
+      } else {
+        let linkedNodes = this.$refs[node.mid].getCheckedNodes()
+        for (let nn of linkedNodes) {
+          this.linkedIds.push(nn.data.id)
+        }
+      }
+      // let linkedNodes = that.$refs[refName].getCheckedNodes()
+    },
+    isRepeat () {
+      let hash = {}
+      for (let i in this.linkedIds) {
+        if (hash[this.linkedIds[i]]) { return true }
+        hash[this.linkedIds[i]] = true
+      }
+      return false
+    },
     createSet () {
+      // 检查是不是有同一个地物类别被映射到不同的自定义类别中
+      this.getlinkedIds(this.data[0])
+      if (this.isRepeat()) {
+        this.$alert('不同的自定义类别不可以引用同一种类别', '无法创建')
+        this.linkedIds = []
+        return
+      }
       this.rrequest()
-      debugger
       let option = {
         'name': this.newSetName,
         'remark': this.newSetComment,
         'filter': {
-          'classes': [],
-          'spatial': {}
+          'classType': [],
+          'geom': {}
         },
         'taxonomy': this.data,
-        'userId': 0
+        'userId': 0,
+        'zoomLevel': this.newSetLevel
       }
       this.$emit('createSet', option)
     },

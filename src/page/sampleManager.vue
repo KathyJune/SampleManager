@@ -4,6 +4,7 @@
       <side-nav
         :classifySys="classifySys"
         :sampleSources="sampleSources"
+        :query-res-list="queryResList"
         @setQuery="setQuery"
         @createSampleSet="createSampleSet"
         @provinceChange="provinceChange"
@@ -87,54 +88,20 @@ export default {
       this.currentPage = pageNo
       this.startQuery()
     },
-    pageUp () {
-      this.currentPage = this.currentPage - 1
-      this.startQuery()
-    },
-    pageDown () {
-      this.currentPage = this.currentPage + 1
-      this.startQuery()
-    },
     /***
      * 创建新的样本集请求
      ***/
     createSet (option) {
-      debugger
       let url = this.$api.sampleSets + '/sp/sampleset'
-      option.filter.classes = ['1']
-      // option.taxonomy = [
-      //   {
-      //     'mid': 1,
-      //     'parentId': -1,
-      //     'label': '我的分类体系'
-      //   },
-      //   {
-      //     'mid': 2,
-      //     'parentId': 1,
-      //     'label': '林地'
-      //   },
-      //   {
-      //     'mid': 3,
-      //     'parentId': 2,
-      //     'label': '松树林',
-      //     'link': [
-      //       {
-      //         'id': 12,
-      //         'label': '松树林地',
-      //         'code': '0102'
-      //       }
-      //     ]
-      //   }
-      // ]
-      option.filter.spatial = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
+      option.filter.classType = this.query.classType
+      option.filter.geom = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
       option.filter = JSON.stringify(option.filter)
       option.taxonomy = JSON.stringify(option.taxonomy)
       this.$http.post(url, option).then((response) => {
-        debugger
         if (response && response.status === 200) {
         }
       })
-      this.ShowCreateDialog = false
+      this.renderDialog = false
     },
     handleCurrentPageChange (val) {
       this.currentPage = val
@@ -154,6 +121,7 @@ export default {
           }
           this.detailLayer = L.geoJSON(polygon).addTo(this.map)
           this.map.flyToBounds(this.detailLayer.getBounds())
+          // this.detailLayer = L.geoJSON(polygon).addTo(this.map)
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
@@ -165,7 +133,6 @@ export default {
       if (str.length <= len * 2) {
         return str
       } else {
-        // debugger
         let a = str.split('')
         a.splice(len, a.length - 2 * len, '..')
         a = a.join('')
@@ -187,25 +154,27 @@ export default {
     startQuery () {
       // this.showTable = true
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
-      // let option00 = {
-      //   'classType': [1],
-      //   'source': ['DistrictofColumbia'],
-      //   'geom': JSON.stringify(this.resultLayer.toGeoJSON().geometry)
-      //   // 'temporal': '1604372920918',
-      // }
       this.$http.post(url00, this.query).then((response) => {
         if (response && response.status === 200) {
           this.renderList(response.data)
+          if (this.queryName === '') {
+            this.queryName = '检索结果' + this.queryResIndex
+            this.queryResIndex = this.queryResIndex + 1
+          }
+          this.queryResList.push({ data: response.data, name: this.queryName })
+          this.queryName = ''
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
       }).catch((response) => {
         console.log(response)
       })
-      // let resData = []
     },
+    /**
+     * 渲染查询到的样本列表
+     **/
     renderList (data) {
-      console.log('aaaaaaaaaaa')
+      debugger
       this.listData = data
       this.showTable = true
       this.resTableList = data.data.content
@@ -248,11 +217,12 @@ export default {
             // layer.bindPopup('点击进入详情')
             layer.on('click', function () {
               console.log(feature, layer)
-              that.SelectedGeojsonChange({id: feature.properties.featureId})
+              that.SelectedGeojsonChange({ id: feature.properties.featureId })
             })
           }
-        }).addTo(that.map)
+        })
       that.map.flyToBounds(that.listPtLayer.getBounds())
+      that.listPtLayer.addTo(that.map)
     },
     init () {
       this.api = this.$api.search
@@ -286,7 +256,7 @@ export default {
       // let WMTS = L.TileLayer.WMTS
       try {
         this.map = L.map('map', {
-          center: [38.89753, -77.036588],
+          center: [28.478348688743406, 113.2250976639748],
           zoom: 13,
           zoomControl: false
         })
@@ -454,7 +424,6 @@ export default {
       return true
     },
     createSampleSet (tree) {
-      debugger
       console.log(tree)
       this.disabledTree = tree
       this.renderDialog = true
@@ -482,46 +451,10 @@ export default {
       let data = { children: this.data1 }
       this.setDataStatus(data, MyKeys)
       console.log(this.data1)
-      // for(let item in this.data1){
-      //   this.setDataStatus(item, checkedKeys)
-      // }
-      // console.log(this.$refs.tree.getCheckedNodes())
     },
     init1 () {
       this.api = this.$api.search
       this.rootApi = this.$api.root1
-
-      // // test api
-      // let url2 = 'http://127.0.0.1:7001/api/v1/common/taxology'
-      // this.$http.post(url2, {}).then((response) => {
-      //   if (response && response.status === 200) {
-      //     let catList = response.data.data.list
-      //     // 根据分类体系的基本信息查找分类体系的具体信息
-      //     let url2 = this.$api.root1 + '/sp/base/taxonomy/detail/list'
-      //     let requests = []
-      //     for (let i = 0; i < catList.length; i++) {
-      //       let item = catList[i]
-      //       item.place = [i]
-      //       let option = { mainId: item.id }
-      //       requests.push(this.$http.post(url2, option))
-      //     }
-      //     let that = this
-      //     that.$http.all(requests).then(function (values) {
-      //       debugger
-      //       let details = []
-      //       for (let item of values) details.push(item.data.data.list)
-      //       that.sortCat(catList, details)
-      //     })
-      //     // this.sortCat(response.data.data.list)
-      //   } else {
-      //     this.$notify.error({ title: '错误', message: response.message })
-      //   }
-      // }).catch((response) => {
-      //   // console.log(response)
-      // })
-
-      // test api
-
       let url = this.$api.root1 + '/sp/base/taxonomy/main/list'
       // let url = 'http://192.168.1.177:9983/sp/base/taxonomy/main/list'
       // 查找分类体系的基本信息
@@ -534,13 +467,19 @@ export default {
           for (let i = 0; i < catList.length; i++) {
             let item = catList[i]
             item.place = [i]
+            item.value = item.id
             let option = { mainId: item.id }
             requests.push(this.$http.post(url2, option))
           }
           let that = this
           that.$http.all(requests).then(function (values) {
             let details = []
-            for (let item of values) details.push(item.data.data.list)
+            for (let item of values) {
+              details.push(item.data.data.list)
+              for (let ii of item.data.data.list) {
+                ii.value = ii.id
+              }
+            }
             that.sortCat(catList, details)
           })
           // this.sortCat(response.data.data.list)
@@ -633,12 +572,15 @@ export default {
     },
     ZoomToCurrentList () {
       this.map.removeLayer(this.detailLayer)
-      this.listPtLayer.addTo(this.map)
       this.map.flyToBounds(this.listPtLayer.getBounds())
+      this.listPtLayer.addTo(this.map)
     }
   },
   data () {
     return {
+      queryName: '',
+      queryResIndex: 1,
+      queryResList: [],
       listData: {},
       listPtLayer: false,
       detailLayer: false,
@@ -728,4 +670,5 @@ export default {
 </style>
 <style lang="scss">
   @import "sampleManager.scss";
+  @import "layout";
 </style>

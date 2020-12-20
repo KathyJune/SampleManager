@@ -332,13 +332,10 @@ export default {
           //   "classType": 1,
           //   "geom": cd
           // }
-          // // debugger
           // this.$http.post(url00, option00).then((response) => {
-          //   debugger
           // }).catch((response) => {
           //   // console.log(response)
           // })
-          // debugger
           _this.resultLayer.on('click', function (e) {
             // 统计
             let left = e.containerPoint.x
