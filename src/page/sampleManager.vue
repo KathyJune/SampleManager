@@ -44,15 +44,6 @@
     </div>
     <b-row>
       <div class="map" id='map'></div>
-      <el-popover
-        ref="popover"
-        placement="right-start"
-        width="100"
-        trigger="click">
-        <ul>
-          <li @click="clearLayer">清除图层</li>
-        </ul>
-      </el-popover>
     </b-row>
     <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0" id="__SVG_SPRITE_NODE__">
       <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" id="icon-map-tool-clear"><defs></defs><rect class="cls-1" x="6" y="14.5" width="18" height="1" rx="0.5" transform="translate(15 36.21) rotate(-135)"></rect><rect class="cls-1" x="6" y="14.5" width="18" height="1" rx="0.5" transform="translate(36.21 15) rotate(135)"></rect></symbol>
@@ -196,10 +187,8 @@ export default {
       }
       this.queryResIndex = this.queryResIndex + 1
       let idx = this.queryResIndex - 1
-      console.log(idx)
       this.queryResFocusIdx = idx
       this.queryResList.push({ query: this.query, name: this.queryName, index: idx })
-      console.log(this.queryResList)
       this.queryName = ''
       this.$message({
         showClose: true,
@@ -296,8 +285,7 @@ export default {
           zoom: 13,
           zoomControl: false
         })
-        console.log(this.map.pm)
-        var layer = L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
         // this.map.addLayer(editableLayers)
         this.drawOptions = {
           snappable: true,
@@ -323,21 +311,6 @@ export default {
         }
         this.map.on('pm:create', (e) => {
           _this.resultLayer = e.layer// 增加到结果图层
-          _this.resultLayer.on('click', function (e) {
-            // 统计
-            let left = e.containerPoint.x
-            let top = e.containerPoint.y
-            let el = document.querySelector('.el-popover')
-            el.style.top = top + 'px'
-            el.style.left = left + 'px'
-            el.style.display = 'block'
-            e.stopPropagation()
-            return false
-          })
-        })
-        this.map.on('click', (e) => {
-          let el = document.querySelector('.el-popover')
-          el.style.display = 'none'
         })
       } catch (e) {
         console.log(e)
@@ -416,8 +389,6 @@ export default {
         this.resultLayer.off('contextmenu')
         this.resultLayer.off('dblclick')
       }
-      let el = document.querySelector('.el-popover')
-      el.style.display = 'none'
       this.polygon && this.polygon.remove()
       this.boundLayers.eachLayer((l) => {
         l.remove()
@@ -472,11 +443,11 @@ export default {
       let checkedKeys = this.$refs.tree.getCheckedKeys()
       let MyKeys = []
       for (let key of checkedKeys) {
-        if (MyKeys.indexOf(key) == -1) {
+        if (MyKeys.indexOf(key) === -1) {
           MyKeys.push(key)
           let temp = key.substring(0, key.length - 2)
-          while (temp != '') {
-            if (MyKeys.indexOf(temp) == -1) {
+          while (temp !== '') {
+            if (MyKeys.indexOf(temp) === -1) {
               MyKeys.push(temp)
               temp = temp.substring(0, temp.length - 2)
             } else break

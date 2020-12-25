@@ -179,7 +179,7 @@
                   </div>
                 </div>
               </el-tab-pane>
-              <el-tab-pane label="变化检测" name="menu">
+              <el-tab-pane label="变化检测" name="menu" v-if="false">
                 <ul class="nav">
                 </ul>
               </el-tab-pane>
