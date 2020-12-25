@@ -5,11 +5,14 @@
         :classifySys="classifySys"
         :sampleSources="sampleSources"
         :query-res-list="queryResList"
+        :queryResFocusIdx="queryResFocusIdx"
         @setQuery="setQuery"
         @createSampleSet="createSampleSet"
         @provinceChange="provinceChange"
         @cityChange="cityChange"
-        @countyChange="countyChange">
+        @countyChange="countyChange"
+        @viewResTable="viewResTable"
+        @deleteQueryRes="deleteQueryRes">
       </side-nav>
     </div>
     <res-list
@@ -23,6 +26,7 @@
     <new-cat ref="sampleDialog"
              :tree="disabledTree"
              :ShowCreateDialog="renderDialog"
+             @closeDialog="closeDialog"
              @createSet="createSet">
     </new-cat>
     <div class="map-tool-bar">
@@ -89,6 +93,12 @@ export default {
       this.startQuery()
     },
     /***
+     * 关闭新建样本集弹窗
+     ***/
+    closeDialog () {
+      this.renderDialog = false
+    },
+    /***
      * 创建新的样本集请求
      ***/
     createSet (option) {
@@ -102,10 +112,11 @@ export default {
         }
       })
       this.renderDialog = false
-    },
-    handleCurrentPageChange (val) {
-      this.currentPage = val
-      this.startQuery()
+      this.$message({
+        showClose: true,
+        message: '恭喜你，创建成功，可以前往样本集管理系统查看',
+        type: 'success',
+        duration: 5000 })
     },
     /***
      *点击表中的记录，请求矢量的详细信息
@@ -143,26 +154,35 @@ export default {
       let reg = /\d{2}-\d{2}-\d{2}/
       return str.match(reg)[0]
     },
+    viewResTable (item) {
+      this.queryResFocusIdx = item.index
+      this.query = item.query
+      this.startQuery()
+    },
+    deleteQueryRes (item) {
+      this.queryResList = this.queryResList.filter((n) => {
+        return n.index !== item.index
+      })
+    },
     setQuery (option) {
       this.query = option
       if (this.resultLayer.toGeoJSON) this.query.geom = JSON.stringify(this.resultLayer.toGeoJSON().geometry)
-      this.startQuery()
+      this.startQuery(true)
     },
     /***
      * 根据检索条件分页查询样本数据列表
      ***/
-    startQuery () {
+    startQuery (addQueryRes) {
       // this.showTable = true
       let url00 = this.$api.samplePreview + '/samples/query?size=' + this.perPage + '&page=' + this.currentPage
       this.$http.post(url00, this.query).then((response) => {
         if (response && response.status === 200) {
-          this.renderList(response.data)
-          if (this.queryName === '') {
-            this.queryName = '检索结果' + this.queryResIndex
-            this.queryResIndex = this.queryResIndex + 1
+          if (response.data.data.content.length !== 0) {
+            this.renderList(response.data)
+            if (addQueryRes) this.addQueryRes()
+          } else {
+            this.$alert('该检索条件下查不到样本数据,建议您重新设置检索条件', '检索结果为空')
           }
-          this.queryResList.push({ data: response.data, name: this.queryName })
-          this.queryName = ''
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
@@ -170,11 +190,27 @@ export default {
         console.log(response)
       })
     },
+    addQueryRes () {
+      if (this.queryName === '') {
+        this.queryName = '检索结果' + this.queryResIndex
+      }
+      this.queryResIndex = this.queryResIndex + 1
+      let idx = this.queryResIndex - 1
+      console.log(idx)
+      this.queryResFocusIdx = idx
+      this.queryResList.push({ query: this.query, name: this.queryName, index: idx })
+      console.log(this.queryResList)
+      this.queryName = ''
+      this.$message({
+        showClose: true,
+        message: '恭喜你，检索成功',
+        type: 'success',
+        duration: 5000 })
+    },
     /**
      * 渲染查询到的样本列表
      **/
     renderList (data) {
-      debugger
       this.listData = data
       this.showTable = true
       this.resTableList = data.data.content
@@ -579,8 +615,12 @@ export default {
   data () {
     return {
       queryName: '',
+      // 检索结果序号（检索结果1、2、3......）
       queryResIndex: 1,
+      // 检索结果列表
       queryResList: [],
+      // 被选中的检索结果（查看或者创建样本集的时候focus)
+      queryResFocusIdx: -1,
       listData: {},
       listPtLayer: false,
       detailLayer: false,

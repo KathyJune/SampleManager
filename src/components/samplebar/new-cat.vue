@@ -2,18 +2,23 @@
   <div class="create-dialog">
       <el-dialog
         title="创建样本集"
-        :visible.sync="ShowCreateDialog"
+        :visible.sync="ShowCreateDialog1"
         class="d-dialog"
         width="800px"
         :before-close="handleClose">
         <div class="input-form">
           <div class="input-form-item">
             <label>样本集名称: </label>
-            <el-input
-              size="small"
-              placeholder="输入样本集名称"
-              v-model="newSetName">
-            </el-input>
+            <el-form :model="newSetName" :rules="rules" ref="formRule">
+              <el-form-item  prop="name">
+                <el-input
+                  size="small"
+                  minlength="1"
+                  placeholder="输入样本集名称"
+                  v-model="newSetName.name">
+                </el-input>
+              </el-form-item>
+            </el-form>
           </div>
           <div class="input-form-item">
             <label>备注: </label>
@@ -85,7 +90,7 @@
           </div>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="linking=false; ShowCreateDialog=false">取 消</el-button>
+          <el-button @click="handleClose">取 消</el-button>
           <el-button v-if="linking" @click="linking=false">上一步</el-button>
           <el-button type="primary" @click="startLinking" v-if="!linking">创建对应关系</el-button>
           <el-button type="primary" @click="createSet" v-if="linking">创建样本集</el-button>
@@ -108,83 +113,23 @@ export default {
   },
   data () {
     return {
+      rules: {
+        name: [
+          { required: true, trigger: 'blur' },
+          { min: 3, message: '长度不少于3个字符', trigger: 'blur' }
+        ]
+      },
       linkedIds: [],
       props: { multiple: true },
-      newSetName: '',
+      newSetName: {
+        name: ''
+      },
       newSetComment: '',
       newSetLevel: 16,
       linking: false,
       zoomLevel: [15, 16, 17, 18, 19, 20],
-      data1: [{
-        id: 1,
-        label: '分类体系1',
-        code: '01',
-        children: [{
-          id: 2,
-          label: '耕地',
-          count: '瓦片：346777,  图斑：2898347',
-          code: '0101',
-          children: [{
-            id: 3,
-            label: '水田',
-            count: '瓦片：121777,  图斑：128347',
-            code: '010101'
-          }, {
-            id: 4,
-            label: '水浇地',
-            count: '瓦片：123347,  图斑：98347',
-            code: '010102'
-          }, {
-            id: 5,
-            label: '旱地',
-            count: '瓦片：98732,  图斑：560128',
-            code: '010103'
-          }]
-        }, {
-          id: 6,
-          label: '园地',
-          count: '瓦片：762354,  9124876',
-          code: '0102',
-          children: [{
-            id: 7,
-            label: '果园',
-            count: '瓦片：87164,  图斑：98237',
-            code: '010201'
-          }, {
-            id: 8,
-            label: '茶园',
-            count: '瓦片：12827,  图斑：111247',
-            code: '010202'
-          }, {
-            id: 9,
-            label: '橡胶园',
-            count: '瓦片：81765,  图斑：90001',
-            code: '010203'
-          }, {
-            id: 9,
-            label: '其他园地',
-            count: '瓦片：81765,  图斑：90001',
-            code: '010204'
-          }]
-        }]
-      }, {
-        id: 13,
-        label: '分类体系2',
-        count: '瓦片：121777,  图斑：128347',
-        code: '02',
-        children: [{
-          id: 11,
-          label: '农作物',
-          count: '瓦片：121777,  图斑：128347',
-          code: '0201'
-        }, {
-          id: 12,
-          label: '林地',
-          count: '瓦片：121777,  图斑：128347',
-          code: '0202'
-        }]
-      }],
-      data: [{
+      data: [],
+      dataBackup: [{
         mid: 1,
         label: '我的分类体系',
         code: 'aa',
@@ -226,9 +171,22 @@ export default {
   },
   mounted () {
     console.log(this.tree)
+    this.data = JSON.parse(JSON.stringify(this.dataBackup))
     // this.rrequest()
   },
+  computed: {
+    ShowCreateDialog1: function () {
+      return this.ShowCreateDialog
+    }
+  },
   methods: {
+    closeDialog () {
+      this.data = JSON.parse(JSON.stringify(this.dataBackup))
+      this.linking = false
+      this.newSetComment = ''
+      this.newSetName.name = ''
+      this.$emit('closeDialog')
+    },
     TreeToList (node, parentId) {
       let temp = JSON.parse(JSON.stringify(node))
       temp.parenId = parentId
@@ -270,7 +228,8 @@ export default {
     handleClose (done) {
       this.$confirm('确认关闭？')
         .then(_ => {
-          done()
+          this.closeDialog()
+          // this.ShowCreateDialog1 = false
         })
         .catch(_ => {})
     },
@@ -331,26 +290,33 @@ export default {
       return false
     },
     createSet () {
-      // 检查是不是有同一个地物类别被映射到不同的自定义类别中
-      this.getlinkedIds(this.data[0])
-      if (this.isRepeat()) {
-        this.$alert('不同的自定义类别不可以引用同一种类别', '无法创建')
-        this.linkedIds = []
-        return
-      }
-      this.rrequest()
-      let option = {
-        'name': this.newSetName,
-        'remark': this.newSetComment,
-        'filter': {
-          'classType': [],
-          'geom': {}
-        },
-        'taxonomy': this.data,
-        'userId': 0,
-        'zoomLevel': this.newSetLevel
-      }
-      this.$emit('createSet', option)
+      // 检查样本集名称是不是已经写了
+      this.$refs['formRule'].validate((valid) => {
+        if (valid) {
+          // 检查是不是有同一个地物类别被映射到不同的自定义类别中
+          this.getlinkedIds(this.data[0])
+          if (this.isRepeat()) {
+            this.$alert('不同的自定义类别不可以引用同一种类别', '无法创建')
+            this.linkedIds = []
+            return
+          }
+          this.rrequest()
+          let option = {
+            'name': this.newSetName.name,
+            'remark': this.newSetComment,
+            'filter': {
+              'classType': [],
+              'geom': {}
+            },
+            'taxonomy': this.data,
+            'userId': 0,
+            'zoomLevel': this.newSetLevel
+          }
+          this.$emit('createSet', option)
+        } else {
+          return false
+        }
+      })
     },
     remove (node, data) {
       const parent = node.parent
