@@ -4,8 +4,6 @@
  * @description
  */
 // eslint-disable-next-line no-unused-vars
-import Vue from 'vue'
-import ElementUI from 'element-ui'
 import io from 'socket.io-client'
 import { getToken } from '@/libs/util'
 const log = (s) => {
@@ -18,11 +16,10 @@ class WebSocket {
     if (this.token) this.open(this.token)
   }
   open (token) {
-    console.log(token)
     if (token) {
       this.token = token
       if (this.socket === '') {
-        this.socket = io('http://192.168.1.132:7001/io/', {
+        this.socket = io('http://192.168.1.177:7001/io/', {
           query: { token },
           transports: ['websocket'],
           reconnection: false,
@@ -39,14 +36,15 @@ class WebSocket {
 
   close () {
     this.socket.close()
-    this.socket.off('notice', this.notice)
     this.socket.off('connect')
+    this.socket.off('reconnect')
+    this.socket.off('disconnecting')
+    this.socket.off('error')
   }
 
   init () {
     this.socket.on('connect', () => {
       console.log('reconnect')
-      this.socket.on('notice', this.notice)
     })
     this.socket.once('reconnect', () => {
       console.log('reconnect')
@@ -59,13 +57,14 @@ class WebSocket {
       log('#error')
     })
   }
-  notice (data) {
-    if (window.location.pathname.indexOf('login') > -1) return false
-    ElementUI.Notification.success({ title: '通知', message: data })
-  }
 }
 const socket = new WebSocket()
+window.socket = socket
 window.onbeforeunload = function () {
-  socket.close()
+  try {
+    window.socket.socket.close()
+  } catch (e) {
+    window.localStorage.setItem('err', JSON.stringify(e))
+  }
 }
 export default socket
