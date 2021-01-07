@@ -19,7 +19,7 @@ class WebSocket {
     if (token) {
       this.token = token
       if (this.socket === '') {
-        this.socket = io('http://192.168.1.177:7001/io/', {
+        this.socket = io('http://192.168.1.120:7001/io/', {
           query: { token },
           transports: ['websocket'],
           reconnection: false,

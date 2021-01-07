@@ -94,8 +94,8 @@ export default {
     startQuery () {
       let url00 = this.$api.rootUrlXiaoliang + '/mlsample/query'
       let option00 = {
-        "classType": 1,
-        "geom": this.resultLayer
+        'classType': 1,
+        'geom': this.resultLayer
       }
       this.$http.post(url00, option00).then((response) => {
 
@@ -116,7 +116,6 @@ export default {
       this.userid = getUserId()
       this.initMap()
       this.getCollect()
-      // this.socketStart()
       document.body.onclick = function () {
         _this.showColList = false
       }
@@ -1012,45 +1011,9 @@ export default {
       let url = window.location.origin + '/spaceView'
       window.open(url, '_blank')
     },
-    socketStart () {
-      let url = this.$api.socket
-      const _this = this
-      this.webSocket = new WebSocket(url)
-      // 连接发生错误的回调方法
-      this.webSocket.onerror = function (e) {
-        console.log('error', e)
-      }
-
-      // 连接成功建立的回调方法
-      this.webSocket.onopen = function (event) {
-        console.log('open', event)
-      }
-      // 接收到消息的回调方法
-      this.webSocket.onmessage = function (event) {
-        let rs = parseJson(event.data)
-        if (rs.action === 'refresh') {
-          _this.refreshRecord()
-        }
-      }
-      this.webSocket.ondisconnect = function (event) {
-        console.log('message', event.data)
-      }
-      // this.webSocket.on('connect', () => {
-      //   console.log('websocket connect')
-      // })
-      // this.webSocket.on('disconnect', () => {
-      //   console.log('websocket connect')
-      // })
-      // this.webSocket.on('error', (error) => {
-      //   console.log(error)
-      // })
-      // this.webSocket.on('message', (data) => {
-      //   console.log(data)
-      // })
-    },
     megrePush () {
       if (this.multipleSelection.length < 2) {
-        this.$notify.warning({title: '警告', message: '请选择2个以上图层进行合并发布！'})
+        this.$notify.warning({ title: '警告', message: '请选择2个以上图层进行合并发布！' })
         return false
       }
       let _state = this.multipleSelection.findIndex((item) => {

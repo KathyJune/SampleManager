@@ -359,7 +359,7 @@ export default {
         })
         option.classType = nodes
       }
-      if (this.dateRange.length !== 0) {
+      if (this.dataRange && this.dateRange.length !== 0) {
         option.startTemporal = this.dateRange[0].getTime()
         option.endTemporal = this.dateRange[1].getTime()
       }

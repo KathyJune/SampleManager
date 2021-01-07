@@ -207,8 +207,6 @@ export default {
     },
     showPercent (message) {
       let _percent = JSON.parse(message)
-      console.log('show')
-      console.log(_percent)
       for (let item of this.sampleSets) {
         if (item.id === _percent.projectId && _percent.percent !== 1) {
           let pp = (_percent.percent * 100).toFixed(2)
@@ -245,6 +243,9 @@ export default {
       else if (state === 3) return 'done'
       else if (state === 4) return 'fail'
       else return 'processing'
+    },
+    beforeDestroy () {
+      this.$socket.socket.off('percent', this.showPercent)
     },
     deleteSet (item) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {

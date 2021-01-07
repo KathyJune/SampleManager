@@ -20,7 +20,6 @@
 
 <script>
 import { HeaderDropdown as AppHeaderDropdown } from '@coreui/vue'
-import { parseJson } from '../../utils/factory'
 
 export default {
   name: 'notification',
@@ -38,12 +37,11 @@ export default {
   methods: {
     init () {
       this.api = this.$api.message
-      this.getNotification()
-      // this.socketStart()
-      const _t = this
-      this.$bus.$on('refreshMessage', content => {
-        content === 'refresh' && _t.getNotification()
-      })
+      // this.getNotification()
+      // const _t = this
+      // this.$bus.$on('refreshMessage', content => {
+      //   content === 'refresh' && _t.getNotification()
+      // })
     },
     getNotification (isShowMessage) {
       let url = this.api.list
@@ -59,7 +57,7 @@ export default {
           _this.total = response.data.data.total
           let _msg = _this.record[0]
           if (isShowMessage && _msg.type) {
-            _this.$notify.success({title: _msg.type, message: _msg.content})
+            _this.$notify.success({ title: _msg.type, message: _msg.content })
           }
         } else {
           // _this.$notify.error({title: '错误', message: response.message})
@@ -91,43 +89,6 @@ export default {
       }).catch((response) => {
         // console.log(response)
       })
-    },
-    socketStart () {
-      let url = this.$api.socket
-      const _this = this
-      this.webSocket = new WebSocket(url)
-      // 连接发生错误的回调方法
-      this.webSocket.onerror = function (e) {
-        console.log('error', e)
-      }
-
-      // 连接成功建立的回调方法
-      this.webSocket.onopen = function (event) {
-        // console.log('open', event)
-      }
-      // 接收到消息的回调方法
-      this.webSocket.onmessage = function (event) {
-        let rs = parseJson(event.data)
-        if (rs.code === 1) {
-          _this.getNotification(true)
-          _this.sendMessage()
-        }
-      }
-      this.webSocket.ondisconnect = function (event) {
-        console.log('message', event.data)
-      }
-      // this.webSocket.on('connect', () => {
-      //   console.log('websocket connect')
-      // })
-      // this.webSocket.on('disconnect', () => {
-      //   console.log('websocket connect')
-      // })
-      // this.webSocket.on('error', (error) => {
-      //   console.log(error)
-      // })
-      // this.webSocket.on('message', (data) => {
-      //   console.log(data)
-      // })
     },
     sendMessage () {
       this.$bus.$emit('syncMessage', 'sync')
