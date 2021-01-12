@@ -90,6 +90,11 @@ const router = new Router({
       path: '/login',
       name: 'Login',
       component: () => import(/* webpackChunkName: "page" */ 'src/components/auth/login')
+    },
+    {
+      path: '/map-test',
+      name: 'MapTest',
+      component: () => import(/* webpackChunkName: "page" */ 'src/page/test')
     }
   ]
 })

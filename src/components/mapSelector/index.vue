@@ -1,0 +1,117 @@
+<template>
+  <div class="map-selector" id="selector-map"></div>
+</template>
+
+<script>
+import { json } from 'd3-fetch'
+import { defaultPolyStyle, selectedPolyStyle } from './styleConfig.json'
+const L = window.L
+// const resolutions = [
+//   156367.7919628329, 78183.89598141646, 39091.94799070823, 19545.973995354114, 9772.986997677057, 4886.4934988385285,
+//   2443.2467494192642, 1221.6233747096321, 610.8116873548161, 305.40584367740803, 152.70292183870401,
+//   76.35146091935201, 38.175730459676004, 19.087865229838002, 9.543932614919001, 4.7719663074595005, 2.3859831537297502, 1.1929915768648751, 0.5964957884324376, 0.2982478942162188
+// ]
+export default {
+  name: '',
+  mounted () {
+    this.init()
+  },
+  methods: {
+    init () {
+      this.$nextTick(() => {
+        this.loadGeoJson()
+      })
+    },
+    initMap (data) {
+      // let _CRS = L.CRS.EPSG3857
+      // if (data['hc-transform']) {
+      //   let crs = data['hc-transform'].default.crs
+      //   let crsName = data.crs.properties.name
+      //   _CRS = new L.Proj.CRS(crsName, crs, {
+      //     resolutions: resolutions
+      //   })
+      // }
+      this.map = L.map('selector-map', {
+        center: [29.99232721748346, 13.957024812698366],
+        zoom: 2
+      })
+      this.resultLayers = L.layerGroup()
+      this.selectedLayers = L.layerGroup()
+      this.rendGeoJson(data)
+      // L.Proj.geoJson(data, {
+      //   style: {
+      //     'color': '#ff0000',
+      //     'weight': 2,
+      //     'opacity': 0.65
+      //   }
+      // }).addTo(this.map)
+    },
+    loadGeoJson () {
+      const _this = this
+      json('/static/world.json').then((data, err) => {
+        if (err) {
+          console.log(err)
+          return false
+        }
+        _this.initMap(data)
+      })
+    },
+    rendGeoJson (geojson) {
+      const _this = this
+      if (geojson.features.length === 0) return false
+      for (let poly of geojson.features) {
+        // let coords = []
+        if (!poly.geometry) continue
+        // for (let ring of poly.geometry.coordinates) {
+        //   if (!ring.map) continue
+        //   ring.map((coord) => {
+        //     if (Array.isArray(coord[0])) {
+        //       coord.map((o) => {
+        //         coords.push([o[1], o[0]])
+        //       })
+        //     } else {
+        //       coords.push([coord[1], coord[0]])
+        //     }
+        //   })
+        // }
+        // const polygonLayer = L.polygon(coords).addTo(this.map)
+        const polygonLayer = L.Proj.geoJson(poly).addTo(this.map)
+        this.addProps(polygonLayer, poly.properties) // 为新增的图层增加属性
+        polygonLayer.setStyle(defaultPolyStyle)
+        polygonLayer.on('click', (e) => {
+          console.log(e.layer, e.layer.setStyle)
+          if (_this.selectedLayer && _this.selectedLayer.setStyle) _this.selectedLayer.setStyle(defaultPolyStyle)
+          _this.selectedLayer = e.layer
+          _this.selectedLayer.setStyle(selectedPolyStyle)
+        })
+        this.resultLayers.addLayer(polygonLayer)
+      }
+    },
+    addProps (layer, props) {
+      layer.properties = layer.properties || {}
+      if (props) {
+        for (let key in props) {
+          if (props.hasOwnProperty(key)) {
+            layer.properties[key] = props[key]
+          }
+        }
+      }
+    }
+  },
+  data () {
+    return {
+      defaultPolyStyle: defaultPolyStyle,
+      selectedPolyStyle: selectedPolyStyle,
+      resultLayers: undefined,
+      selectedLayers: undefined,
+      selectedLayer: undefined
+    }
+  }
+}
+</script>
+<style lang="scss">
+  .map-selector {
+    width: 100%;
+    height: 100%;
+  }
+</style>
