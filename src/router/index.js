@@ -24,6 +24,32 @@ const router = new Router({
       component: () => import(/* webpackChunkName: "page" */ 'src/components/containers/DefaultContainer'),
       children: [
         {
+          path: 'basicSet',
+          name: 'basicSet',
+          meta: {
+            access: ['admin'],
+            label: '基础样本集'
+          },
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSet'),
+          beforeLeave: (to, from, next) => {
+            this.refreshTimer = undefined
+            next()
+          }
+        },
+        {
+          path: 'basicSetDetail',
+          name: 'basicSetDetail',
+          meta: {
+            access: ['admin'],
+            label: '基础样本集详情'
+          },
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSetDetail'),
+          beforeLeave: (to, from, next) => {
+            this.refreshTimer = undefined
+            next()
+          }
+        },
+        {
           path: 'sampleManager',
           name: 'sampleManager',
           meta: {
