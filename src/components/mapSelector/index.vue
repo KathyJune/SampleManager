@@ -1,5 +1,12 @@
 <template>
-  <div class="map-selector" id="selector-map"></div>
+  <div class="map-container">
+    <el-button class="map-back" size="small" @click="returnBack" v-if="mapType==='country'">退回</el-button>
+    <div class="map-selector" id="selector-map"></div>
+    <div class="map-selector-tips">
+      <label>当前选择：</label> <label v-html="currentArea.name"></label>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -19,25 +26,17 @@ export default {
   methods: {
     init () {
       this.$nextTick(() => {
-        this.loadGeoJson()
+        this.initMap()
       })
     },
     initMap (data) {
-      // let _CRS = L.CRS.EPSG3857
-      // if (data['hc-transform']) {
-      //   let crs = data['hc-transform'].default.crs
-      //   let crsName = data.crs.properties.name
-      //   _CRS = new L.Proj.CRS(crsName, crs, {
-      //     resolutions: resolutions
-      //   })
-      // }
       this.map = L.map('selector-map', {
         center: [29.99232721748346, 13.957024812698366],
-        zoom: 2
+        zoom: 1
       })
       this.resultLayers = L.layerGroup()
       this.selectedLayers = L.layerGroup()
-      this.rendGeoJson(data)
+      this.loadGeoJson()
       // L.Proj.geoJson(data, {
       //   style: {
       //     'color': '#ff0000',
@@ -52,7 +51,9 @@ export default {
         if (err) {
           return false
         }
-        _this.initMap(data)
+        _this.clearLayer()
+        _this.mapType = 'world'
+        _this.rendGeoJson(data)
       })
     },
     rendGeoJson (geojson) {
@@ -80,10 +81,10 @@ export default {
         polygonLayer.on('click', (e) => {
           if (_this.selectedLayer && _this.selectedLayer.setStyle) _this.selectedLayer.setStyle(defaultPolyStyle)
           _this.selectedLayer = e.layer
+          _this.currentArea = e.layer.feature.properties
           _this.selectedLayer.setStyle(selectedPolyStyle)
         })
         polygonLayer.on('dblclick', (e) => {
-          console.log(e.layer.feature.properties)
           let properties = e.layer.feature.properties
           if (properties.name === 'China' || properties.name === 'United States of America') {
             _this.loadCountry(properties)
@@ -101,6 +102,7 @@ export default {
           return false
         }
         _this.clearLayer()
+        _this.mapType = 'country'
         _this.rendGeoJson(data)
       })
     },
@@ -125,6 +127,10 @@ export default {
         // 清除地图Group里面缓存
         this.resultLayers.clearLayers()
       }
+    },
+    returnBack () {
+      //
+      this.loadGeoJson()
     }
   },
   data () {
@@ -133,14 +139,37 @@ export default {
       selectedPolyStyle: selectedPolyStyle,
       resultLayers: undefined,
       selectedLayers: undefined,
-      selectedLayer: undefined
+      selectedLayer: undefined,
+      mapType: 'world',
+      currentArea: {}
     }
   }
 }
 </script>
 <style lang="scss">
-  .map-selector {
+  .map-container {
     width: 100%;
     height: 100%;
+    position: relative;
+    overflow: hidden;
+
+    .map-selector {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-back {
+      right: 15px;
+      top: 15px;
+      position: absolute;
+      z-index: 19;
+    }
+    .map-selector-tips {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      align-items: center;
+    }
   }
 </style>
