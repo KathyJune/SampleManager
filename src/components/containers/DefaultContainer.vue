@@ -13,7 +13,7 @@
         <b-nav-item class="px-3" to="/home/basicSetDetail">基础样本集详情</b-nav-item>
         <b-nav-item class="px-3" to="/home/sampleManager" exact>样本管理</b-nav-item>
         <b-nav-item class="px-3" to="/home/sampleSetManager">样本集管理</b-nav-item>
-        <!--<b-nav-item class="px-3" to="/data/dataset">我的数据</b-nav-item>-->
+        <b-nav-item class="px-3" to="/home/SetCreator">创建样本集</b-nav-item>
         <!--<b-nav-item class="px-3" to="/sys/queryManage" >系统管理</b-nav-item>-->
         <!--<b-nav-item-dropdown id="nav_ddown" text="系统管理" extra-toggle-classes="nav-link-custom" class="px-3" right>-->
           <!--&lt;!&ndash;<b-dropdown-item to="/data/user">用户管理</b-dropdown-item>&ndash;&gt;-->

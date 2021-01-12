@@ -1,23 +1,37 @@
 <template>
 <div class="basic-set">
   <div class="flex-row">
-    <el-card class="geo-picker"></el-card>
+    <div class="geo-picker">
+      <el-card>
+        <map-selector></map-selector>
+      </el-card>
+    </div>
     <div class="top-right-group">
       <el-card id="chart" class="card-2">
       </el-card>
       <el-card class="card-3">
-        <el-date-picker
-          v-model="queryFactor.startTime"
-          type="datetime"
-          placeholder="选择日期时间">
-        </el-date-picker>
-        <el-date-picker
-          v-model="queryFactor.endTime"
-          type="datetime"
-          placeholder="选择日期时间">
-        </el-date-picker>
-        <el-radio v-model="queryFactor.type" label="1">地物提取</el-radio>
-        <el-radio v-model="queryFactor.type" label="2">变化监测</el-radio>
+        <div class="title-1">条件过滤</div>
+        <div>
+          <el-date-picker
+            v-model="queryFactor.startTime"
+            type="date"
+            size="mini"
+            placeholder="起始时间">
+          </el-date-picker>
+          <el-date-picker
+            v-model="queryFactor.endTime"
+            type="date"
+            size="mini"
+            placeholder="截止时间">
+          </el-date-picker>
+          <div class="radios">
+            <el-radio v-model="queryFactor.type" label="0">地物提取</el-radio>
+            <el-radio v-model="queryFactor.type" label="1">变化监测</el-radio>
+          </div>
+          <el-button size="mini" type="primary">创建样本集</el-button>
+        </div>
+        <div>
+        </div>
       </el-card>
     </div>
   </div>
@@ -28,29 +42,12 @@
         <div style="padding: 10px;">
           <p v-html="item.name" class="box-card-title"></p>
           <div class="box-card-bottom clearfix">
-            <el-button class="button" @click="handleClick(item)" >管理</el-button>
+            <el-button type="primary" size="mini" class="button" @click="handleClick(item)" >查看</el-button>
           </div>
         </div>
       </el-card>
     </el-card>
   </div>
-  <!--<VuePerfectScrollbar class="scroll-area" :settings="psSettings">-->
-    <!--<div class="data-card">-->
-      <!--<ul>-->
-        <!--<li v-for="item in setList" :key="item.id">-->
-          <!--<el-card class="box-card">-->
-            <!--<img src="/img/project.png" draggable="false" style="width: 256px; height: 256px;" class="box-card-image">-->
-            <!--<div style="padding: 10px;">-->
-              <!--<p v-html="item.name" class="box-card-title"></p>-->
-              <!--<div class="box-card-bottom clearfix">-->
-                <!--<el-button class="button" @click="handleClick(item)" >管理</el-button>-->
-              <!--</div>-->
-            <!--</div>-->
-          <!--</el-card>-->
-        <!--</li>-->
-      <!--</ul>-->
-    <!--</div>-->
-  <!--</VuePerfectScrollbar>-->
 </div>
 </template>
 
@@ -58,10 +55,12 @@
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import { sampleStatus, setList } from './sampleData'
 import echarts from 'echarts'
+import MapSelector from 'src/components/mapSelector'
 export default {
   name: 'basicSet',
   components: {
-    VuePerfectScrollbar
+    VuePerfectScrollbar,
+    MapSelector
   },
   data () {
     return {
@@ -69,7 +68,7 @@ export default {
         startTime: false,
         endTime: false,
         geoCode: '',
-        type: 0
+        type: '1'
       },
       psSettings: {
         maxScrollbarLength: 200,

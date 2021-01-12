@@ -25,4 +25,32 @@
 .flex-row{
   display: flex;
 }
+.title-1{
+  font-weight: bold;
+  font-size: larger;
+  padding-bottom: 10px;
+}
+.step-bar{
+  width: 60vw;
+  min-width: 850px;
+  margin-bottom: 15px;
+
+  //margin-right: 50px;
+  //width: 200px;
+  //height: 500px;
+  //min-height: 300px;
+  //margin: auto;
+  //widows: ;
+}
+.big-card{
+  max-height: calc(100vh - 220px);
+  overflow-y: scroll;
+  .el-card__body{
+    width: 100%;
+  }
+}
+.big-card::-webkit-scrollbar {
+  display: none;
+}
+
 

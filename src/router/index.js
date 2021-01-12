@@ -75,6 +75,20 @@ const router = new Router({
             next()
           }
         }
+        ,
+        {
+          path: 'SetCreator',
+          name: 'SetCreator',
+          meta: {
+            access: ['admin'],
+            label: '样本集创建'
+          },
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/training'),
+          beforeLeave: (to, from, next) => {
+            this.refreshTimer = undefined
+            next()
+          }
+        }
       ]
     },
     {

@@ -22,7 +22,7 @@ export const sampleDistributionOption = {
     type: 'value',
     boundaryGap: [0, 0.01],
     axisLabel: {
-      interval: 1, // 代表显示所有x轴标签显示
+      interval: 1 // 代表显示所有x轴标签显示
       // rotate: 45 // 代表逆时针旋转45度
     }
   },
@@ -39,8 +39,13 @@ export const sampleDistributionOption = {
   ]
 }
 export const sampleStatus = {
+  title: {
+    text: '数据集样本数量统计',
+    x: 'center',
+    padding: [15, 0, 0, 0]
+  },
   grid: {
-    top: '5%',
+    top: '50',
     left: '8%',
     right: '5%',
     bottom: '5%',
