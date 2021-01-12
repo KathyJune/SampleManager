@@ -9,9 +9,10 @@
       </b-link>
       <!--<SidebarToggler class="d-md-down-none" display="lg" />-->
       <b-navbar-nav class="d-md-down-none">
+        <b-nav-item class="px-3" to="/home/basicSet">基础样本集</b-nav-item>
+        <b-nav-item class="px-3" to="/home/basicSetDetail">基础样本集详情</b-nav-item>
         <b-nav-item class="px-3" to="/home/sampleManager" exact>样本管理</b-nav-item>
         <b-nav-item class="px-3" to="/home/sampleSetManager">样本集管理</b-nav-item>
-       <!--<b-nav-item class="px-3" to="/data/analysis">数据分析</b-nav-item>-->
         <!--<b-nav-item class="px-3" to="/data/dataset">我的数据</b-nav-item>-->
         <!--<b-nav-item class="px-3" to="/sys/queryManage" >系统管理</b-nav-item>-->
         <!--<b-nav-item-dropdown id="nav_ddown" text="系统管理" extra-toggle-classes="nav-link-custom" class="px-3" right>-->
@@ -34,7 +35,7 @@
     </AppHeader>
     <div class="app-body">
       <main class="main">
-        <Breadcrumb :list="list" v-if="false"/>
+        <Breadcrumb v-if="showBread()" :list="list"><li slot="pageName" class="breadcrumb-item"></li></Breadcrumb>
         <div class="container-fluid">
           <router-view></router-view>
         </div>
@@ -98,6 +99,8 @@ export default {
       return this.$route.name
     },
     list () {
+      let a = this.$route.matched.filter((route) => route.name || route.meta.label)
+      console.log(a)
       return this.$route.matched.filter((route) => route.name || route.meta.label)
     }
   },
@@ -105,9 +108,19 @@ export default {
     this.init()
   },
   methods: {
+    showBread () {
+      if (this.$route.matched[1] && this.$route.matched[1].meta.label === '基础样本集详情'){
+        return true
+      }
+    },
     init () {
       document.body.classList.toggle('sidebar-show')
     }
   }
 }
 </script>
+<style lang="scss">
+.breadcrumb{
+  margin-bottom: 0;
+}
+</style>
