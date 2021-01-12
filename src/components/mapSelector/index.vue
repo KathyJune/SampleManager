@@ -50,7 +50,6 @@ export default {
       const _this = this
       json('/static/world.json').then((data, err) => {
         if (err) {
-          console.log(err)
           return false
         }
         _this.initMap(data)
@@ -79,13 +78,31 @@ export default {
         this.addProps(polygonLayer, poly.properties) // 为新增的图层增加属性
         polygonLayer.setStyle(defaultPolyStyle)
         polygonLayer.on('click', (e) => {
-          console.log(e.layer, e.layer.setStyle)
           if (_this.selectedLayer && _this.selectedLayer.setStyle) _this.selectedLayer.setStyle(defaultPolyStyle)
           _this.selectedLayer = e.layer
           _this.selectedLayer.setStyle(selectedPolyStyle)
         })
+        polygonLayer.on('dblclick', (e) => {
+          console.log(e.layer.feature.properties)
+          let properties = e.layer.feature.properties
+          if (properties.name === 'China' || properties.name === 'United States of America') {
+            _this.loadCountry(properties)
+          }
+        })
         this.resultLayers.addLayer(polygonLayer)
       }
+    },
+    // 点击中国或者美国加载响应国家geojson
+    loadCountry (properties) {
+      const _this = this
+      let name = properties.name
+      json(`/static/${name}.json`).then((data, err) => {
+        if (err) {
+          return false
+        }
+        _this.clearLayer()
+        _this.rendGeoJson(data)
+      })
     },
     addProps (layer, props) {
       layer.properties = layer.properties || {}
@@ -95,6 +112,18 @@ export default {
             layer.properties[key] = props[key]
           }
         }
+      }
+    },
+    clearLayer () {
+      let layers = this.resultLayers.getLayers()
+      if (layers.length > 0) {
+        // 清除地图上框，如果不执行图层清除是会有缓存
+        this.resultLayers.eachLayer(function (layer) {
+          layer.remove()
+        })
+        this.selectedLayer = undefined
+        // 清除地图Group里面缓存
+        this.resultLayers.clearLayers()
       }
     }
   },
