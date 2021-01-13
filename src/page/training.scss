@@ -215,3 +215,90 @@
     }
   }
 }
+
+//from projectManager.scss - geospot
+
+.main-content {
+  width: 100%;
+  margin: 0 auto;
+  padding: 15px;
+  height: 100%;
+}
+.query-tool {
+  margin-bottom: 15px;
+  position: relative;
+  .search {
+    width: 300px;
+    display: inline-block;
+    margin-right: 20px;
+  }
+  .project-info {
+    p {
+      line-height: 30px;
+      margin-bottom: 10px;
+    }
+    p span{
+      margin-right: 15px;
+    }
+  }
+  label {
+    margin-right: 10px;
+  }
+  .el-select {
+    margin-right: 15px;
+  }
+}
+.task-generate {
+  .el-transfer-panel__item {
+    display: block;
+  }
+}
+
+.cell-color {
+  width: 75%;
+  height: 30px;
+  display: block;
+}
+.main-content.category{
+  position: static;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px !important;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+.table-icon {
+  width: 30px;
+  height: 30px;
+}
+.task-container {
+  width: 100%;
+}
+/* project-info page*/
+.project-info {
+  .data-map {
+    width: 800px;
+    padding: 0 20px;
+    .category-system {
+      margin-right: 15px;
+    }
+  }
+}

@@ -7,9 +7,13 @@
         </div>
         <nav class="sidebar-nav">
           <VuePerfectScrollbar class="scroll-area" :settings="psSettings">
-            <div class="x-large-bold regular-vertical-padding">{{setInfo.name}}</div>
-            <div class="desc regular-vertical-padding">{{setInfo.desc}}</div>
-            <div class="small">采集时间：<span class="small-bold bright-blue-text">{{setInfo.time}}</span></div>
+            <div class="title-2">数据集名称</div>
+            <div class="retract-text large-text regular-vertical-padding">{{setInfo.name}}</div>
+            <div class="title-2">数据集描述</div>
+            <div class="retract-text large-text regular-vertical-padding">{{setInfo.desc}}</div>
+            <div class="title-2">数据采集时间</div>
+            <div class="retract-text large-text regular-vertical-padding bright-blue-text">{{setInfo.time}}</div>
+            <div class="title-2">分类体系统计</div>
             <div class="chart" id="chart"></div>
           </VuePerfectScrollbar>
         </nav>
@@ -51,6 +55,7 @@ export default {
     },
     initChart () {
       let myChart = echarts.init(document.getElementById('chart'))
+      console.log(this.setInfo.classDis)
       myChart.setOption(this.setInfo.classDis)
     },
     initMap () {

@@ -13,7 +13,7 @@ export const sampleDistributionOption = {
   grid: {
     top: '3%',
     left: '3%',
-    right: '4%',
+    right: '6%',
     bottom: '3%',
     containLabel: true
   },
@@ -28,13 +28,13 @@ export const sampleDistributionOption = {
   },
   yAxis: {
     type: 'category',
-    data: []
+    data: ['河流', '湖泊', '沟渠', '干渠']
   },
   series: [
     {
       name: '加州数据集',
       type: 'bar',
-      data: []
+      data: [333, 823, 123, 555]
     }
   ]
 }

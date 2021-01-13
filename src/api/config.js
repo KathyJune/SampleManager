@@ -6,6 +6,8 @@
 // const config = require('../../config')
 // let _config = process.env.NODE_ENV === 'production' ? config.build : config.dev
 // let host = 'http://' + _config.host + ':8089'http://192.168.1.135:7001/api/v1/common/login
+const ApiUrl = process.env.NODE_ENV === 'production' ? 'http://192.168.1.177:7001/api/v1' : 'http://192.168.1.104:7001/api/v1'
+const baseUrl1 = ApiUrl + '/sample/'
 const rootUrl1 = '/api'
 const samplePreview = '/samplePreview'
 const sampleDetail = '/sampleDetail'
@@ -25,7 +27,12 @@ const _layer = '/layers'
 const baseUrl = rootUrl + '/imagepro'
 
 export default {
+  Pagination: {
+    size: 20
+  },
+  ApiUrl: ApiUrl,
   root1: rootUrl1,
+  baseUrl: baseUrl1,
   samplePreview: samplePreview,
   sampleDetail: sampleDetail,
   sampleSets: sampleSets,

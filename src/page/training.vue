@@ -2,7 +2,7 @@
   <div class="training">
     <div class="step-bar">
       <el-steps :active="currentStep" simple>
-        <el-step title="创建任务" icon="el-icon-picture"></el-step>
+        <el-step title="创建样本集" icon="el-icon-picture"></el-step>
         <el-step title="选择样本" icon="el-icon-edit"></el-step>
         <el-step title="选择算法" icon="el-icon-upload"></el-step>
         <el-step title="模型训练" icon="el-icon-picture"></el-step>
@@ -40,7 +40,89 @@
           </div>
         </div>
       </div>
-      <div v-if="currentStep === 2" class="meta-setting step">
+      <div v-if="currentStep === 2" class="step">
+        <div class="step-title">
+          选择分类体系
+        </div>
+        <div class="">
+          <div class="page page-classification main-content">
+            <div class='query-tool'>
+              <div class="search">
+                <el-input
+                  placeholder="请输入内容"
+                  v-model="category" @keyup.enter.native="getRecord2">
+                  <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                </el-input>
+              </div>
+              <el-button type="primary" icon="el-icon-edit" @click="getRecord2">查询</el-button>
+              <el-button type="primary" icon="el-icon-edit" @click="handleAdd2">新增分类体系</el-button>
+            </div>
+            <div class="table-panel choose-panel">
+              <el-table
+                :data="tableData"
+                border
+                style="width: 100%">
+                <el-table-column
+                  fixed="right"
+                  label="操作"
+                  min-width="150">
+                  <template slot-scope="scope">
+                    <el-button @click="handleClick2(scope.row)" type="primary" size="small">编辑</el-button>
+                    <!--            <el-button @click="handleClone(scope.row)" type="primary" size="small">克隆</el-button>-->
+                    <!--            <el-button @click="handleFreeze(scope.row)" type="primary" size="small">冻结</el-button>-->
+                    <el-button @click="handleDetail(scope.row)" type="primary " size="small">明细</el-button>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="id"
+                  label="ID"
+                  min-width="40">
+                </el-table-column>
+                <el-table-column
+                  prop="taonomyName"
+                  label="体系名称"
+                  min-width="120">
+                </el-table-column>
+                <el-table-column
+                  prop="taonomyType"
+                  label="类别"
+                  min-width="100">
+                </el-table-column>
+                <el-table-column
+                  prop="state_type"
+                  label="状态"
+                  min-width="80">
+                </el-table-column>
+                <el-table-column
+                  prop="memo"
+                  label="备注"
+                  min-width="150">
+                </el-table-column>
+              </el-table>
+            </div>
+            <el-dialog :title="formTitle" :visible.sync="dialogFormVisible" width="400px">
+              <el-form :model="form" ref="form" :rules="rules">
+                <el-form-item label="分类名称" :label-width="formLabelWidth" prop="taonomyName">
+                  <el-input v-model="form.taonomyName" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="分类类别" :label-width="formLabelWidth" prop="taonomyType">
+                  <el-radio v-model="form.taonomyType" label="1">地物分类</el-radio>
+                  <el-radio v-model="form.taonomyType" label="2">变化检测</el-radio>
+                </el-form-item>
+                <el-form-item label="备注" :label-width="formLabelWidth">
+                  <el-input type="textarea" placeholder="请输入内容" v-model="form.memo" :rows="4" maxlength="200" show-word-limit>
+                  </el-input>
+                </el-form-item>
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitForm2">确 定</el-button>
+              </div>
+            </el-dialog>
+          </div>
+        </div>
+      </div>
+      <div v-if="currentStep === 3" class="meta-setting step">
         <div class="step-title">
           创建分类体系
           <el-button @click="">进入下一步</el-button>
@@ -130,13 +212,6 @@
           </div>
         </div>
       </div>
-      <div v-if="currentStep === 3" class="select-al step">
-        <div class="step-title">
-          选择算法
-        </div>
-        <div class="select-al-body">
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -145,7 +220,10 @@
 import { addCategory, putCategory, delCategory } from '@/api/category'
 import { generateTree, generateList, isNull } from '@/libs/factory'
 import GeoTree from 'src/components/geo-tree'
-import Api from 'src/api/api'
+import { getCategoryList } from '@/api/category'
+import {getList} from '@/api/common'
+import { getClassifyList, addClassify, PutClassify } from 'src/api/classification'
+import Api from 'src/api/config'
 // import { dateFormart } from 'src/libs/factory'
 const param = {
   keyName: 'id',
@@ -232,6 +310,14 @@ export default {
     }
   },
   methods: {
+    handleClick (row) {
+      let id = row.id
+      const _form = this.record.find((o) => o.id === id)
+      this.form = _form
+      this.formTitle = '修改分类'
+      this.opt = 'edit'
+      this.dialogFormVisible = true
+    },
     handleDragOver (e) {
       e.preventDefault()
     },
@@ -467,6 +553,87 @@ export default {
       this.dialogFormVisible = true
     },
     init () {
+    },
+    getRecord2 () {
+      const _this = this
+      let query = {
+        page: 0,
+        size: 20
+      }
+      getClassifyList(query).then((response) => {
+        const { data } = response
+        if (data && data.code === _this.$config.statusCode) {
+          _this.tableData = data.data.list
+        } else {
+          _this.$notify.error({ title: '错误', message: data.message })
+        }
+      }).catch((response) => {
+        // console.log(response)
+      })
+    },
+    handleClick2 (row) {
+      this.form = row
+      this.formTitle = '修改分类'
+      this.opt = 'edit'
+      this.dialogFormVisible = true
+    },
+    handleClone (row) {
+      //
+    },
+    handleFreeze (row) {
+      //
+    },
+    handleAdd2 () {
+      this.form = {
+        taonomyName: '',
+        taonomyType: 0,
+        memo: ''
+      }
+      this.formTitle = '新增分类'
+      this.opt = 'add'
+      this.dialogFormVisible = true
+    },
+    handleDetail (row) {
+      this.$router.push({ name: 'Category', params: { id: row.id } })
+    },
+    handledelete2 (row) {
+      const _this = this
+      this.delCategory(row.id).then((response) => {
+        const { data } = response
+        if (data && data.code === _this.$config.statusCode) {
+          _this.getRecord2()
+        } else {
+          _this.$notify.error({ title: '错误', message: data.message })
+        }
+      }).catch((response) => {
+        // console.log(response)
+      })
+    },
+    submitForm2 () {
+      let _this = this
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          let promise
+          if (_this.opt === 'add') {
+            promise = addClassify(_this.form)
+          } else {
+            promise = PutClassify(_this.form)
+          }
+          promise.then((response) => {
+            const { data } = response
+            if (data && data.code === _this.$config.statusCode) {
+              _this.getRecord2()
+            } else {
+              _this.$notify.error({ title: '错误', message: data.message })
+            }
+          }).catch((response) => {
+            // console.log(response)
+          })
+          _this.dialogFormVisible = false
+        } else {
+          return false
+        }
+      })
     }
   }
 }
