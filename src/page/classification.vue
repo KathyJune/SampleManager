@@ -88,9 +88,9 @@ export default {
   methods: {
     init () {
       this.project = this.$route.params.id || 0
-      this.getRecord()
+      this.getCatogeries()
     },
-    getRecord () {
+    getCatogeries () {
       const _this = this
       let query = {
         page: 0,
@@ -119,7 +119,7 @@ export default {
     handleFreeze (row) {
       //
     },
-    handleAdd () {
+    handleAddCategory () {
       this.form = {
         taonomyName: '',
         taonomyType: 0,
@@ -132,12 +132,12 @@ export default {
     handleDetail (row) {
       this.$router.push({ name: 'Category', params: { id: row.id } })
     },
-    handledelete (row) {
+    handledeleteCategory (row) {
       const _this = this
       this.delCategory(row.id).then((response) => {
         const { data } = response
         if (data && data.code === _this.$config.statusCode) {
-          _this.getRecord()
+          _this.getCatogeries()
         } else {
           _this.$notify.error({ title: '错误', message: data.message })
         }
@@ -158,7 +158,7 @@ export default {
           promise.then((response) => {
             const { data } = response
             if (data && data.code === _this.$config.statusCode) {
-              _this.getRecord()
+              _this.getCatogeries()
             } else {
               _this.$notify.error({ title: '错误', message: data.message })
             }

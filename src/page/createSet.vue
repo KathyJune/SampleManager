@@ -41,176 +41,181 @@
         </div>
       </div>
       <div v-if="currentStep === 2" class="step">
-        <div class="step-title">
-          选择分类体系
-        </div>
-        <div class="">
-          <div class="page page-classification main-content">
-            <div class='query-tool'>
-              <div class="search">
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="category" @keyup.enter.native="getRecord2">
-                  <i slot="prefix" class="el-input__icon el-icon-search"></i>
-                </el-input>
-              </div>
-              <el-button type="primary" icon="el-icon-edit" @click="getRecord2">查询</el-button>
-              <el-button type="primary" icon="el-icon-edit" @click="handleAdd2">新增分类体系</el-button>
-            </div>
-            <div class="table-panel choose-panel">
-              <el-table
-                :data="classList"
-                border
-                style="width: 100%">
-                <el-table-column
-                  fixed="right"
-                  label="操作"
-                  min-width="150">
-                  <template slot-scope="scope">
-                    <el-button @click="handleClick2(scope.row)" type="primary" size="small">编辑</el-button>
-                    <!--            <el-button @click="handleClone(scope.row)" type="primary" size="small">克隆</el-button>-->
-                    <!--            <el-button @click="handleFreeze(scope.row)" type="primary" size="small">冻结</el-button>-->
-                    <el-button @click="handleDetail(scope.row)" type="primary " size="small">明细</el-button>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="id"
-                  label="ID"
-                  min-width="40">
-                </el-table-column>
-                <el-table-column
-                  prop="taonomyName"
-                  label="体系名称"
-                  min-width="120">
-                </el-table-column>
-                <el-table-column
-                  prop="taonomyType"
-                  label="类别"
-                  min-width="100">
-                </el-table-column>
-                <el-table-column
-                  prop="state_type"
-                  label="状态"
-                  min-width="80">
-                </el-table-column>
-                <el-table-column
-                  prop="memo"
-                  label="备注"
-                  min-width="150">
-                </el-table-column>
-              </el-table>
-            </div>
-            <el-dialog :title="formTitle" :visible.sync="addClassifyDialogFormVisible" width="400px">
-              <el-form :model="form" ref="form" :rules="rules">
-                <el-form-item label="分类名称" :label-width="formLabelWidth" prop="taonomyName">
-                  <el-input v-model="form.taonomyName" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="分类类别" :label-width="formLabelWidth" prop="taonomyType">
-                  <el-radio v-model="form.taonomyType" label="1">地物分类</el-radio>
-                  <el-radio v-model="form.taonomyType" label="2">变化检测</el-radio>
-                </el-form-item>
-                <el-form-item label="备注" :label-width="formLabelWidth">
-                  <el-input type="textarea" placeholder="请输入内容" v-model="form.memo" :rows="4" maxlength="200" show-word-limit>
+        <div v-if="!showDetail">
+          <div class="step-title">
+            选择分类体系
+          </div>
+          <div class="">
+            <div class="page page-classification main-content">
+              <div class='query-tool'>
+                <div class="search">
+                  <el-input
+                    placeholder="请输入内容"
+                    v-model="category" @keyup.enter.native="getClassRecord">
+                    <i slot="prefix" class="el-input__icon el-icon-search"></i>
                   </el-input>
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="addClassifyDialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="submitForm2">确 定</el-button>
+                </div>
+                <el-button type="primary" icon="el-icon-edit" @click="getClassRecord">查询</el-button>
+                <el-button type="primary" icon="el-icon-edit" @click="handleAddClass">新增分类体系</el-button>
               </div>
-            </el-dialog>
+              <div class="table-panel choose-panel">
+                <el-table
+                  :data="classList"
+                  border
+                  style="width: 100%">
+                  <el-table-column
+                    fixed="right"
+                    label="操作"
+                    min-width="150">
+                    <template slot-scope="scope">
+                      <el-button @click="editClass(scope.row)" type="primary" size="small">编辑</el-button>
+                      <!--            <el-button @click="handleClone(scope.row)" type="primary" size="small">克隆</el-button>-->
+                      <!--            <el-button @click="handleFreeze(scope.row)" type="primary" size="small">冻结</el-button>-->
+                      <el-button @click="handleDetail(scope.row)" type="primary " size="small">明细</el-button>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    prop="id"
+                    label="ID"
+                    min-width="40">
+                  </el-table-column>
+                  <el-table-column
+                    prop="taonomyName"
+                    label="体系名称"
+                    min-width="120">
+                  </el-table-column>
+                  <el-table-column
+                    prop="taonomyType"
+                    label="类别"
+                    min-width="100">
+                  </el-table-column>
+                  <el-table-column
+                    prop="state_type"
+                    label="状态"
+                    min-width="80">
+                  </el-table-column>
+                  <el-table-column
+                    prop="memo"
+                    label="备注"
+                    min-width="150">
+                  </el-table-column>
+                </el-table>
+              </div>
+              <el-dialog :title="formTitle" :visible.sync="classDialogFormVisible" width="400px">
+                <el-form :model="classForm" ref="classForm" :rules="rules">
+                  <el-form-item label="分类名称" :label-width="formLabelWidth" prop="taonomyName">
+                    <el-input v-model="classForm.taonomyName" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="分类类别" :label-width="formLabelWidth" prop="taonomyType">
+                    <el-radio v-model="classForm.taonomyType" label="1">地物分类</el-radio>
+                    <el-radio v-model="classForm.taonomyType" label="2">变化检测</el-radio>
+                  </el-form-item>
+                  <el-form-item label="备注" :label-width="formLabelWidth">
+                    <el-input type="textarea" placeholder="请输入内容" v-model="classForm.memo" :rows="4" maxlength="200" show-word-limit>
+                    </el-input>
+                  </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="classDialogFormVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="submitForm2">确 定</el-button>
+                </div>
+              </el-dialog>
+            </div>
+          </div>
+        </div>
+        <!--设置明细-->
+        <div v-if="showDetail">
+          <div class="step-title">
+            创建分类体系
+            <el-button>进入下一步</el-button>
+          </div>
+          <div class="content">
+            <div class="main-content category">
+              <div class='query-tool'>
+                <div class="search">
+                  <!--<el-input-->
+                  <!--placeholder="请输入内容"-->
+                  <!--v-model="category" @keyup.enter.native="getCatogeries">-->
+                  <!--<i slot="prefix" class="el-input__icon el-icon-search"></i>-->
+                  <!--</el-input>-->
+                  <el-input
+                    placeholder="请输入内容"
+                    v-model="category">
+                    <i slot="prefix" class="el-input__icon el-icon-search"></i>
+                  </el-input>
+                </div>
+                <el-button type="primary" icon="el-icon-edit" @click="getCatogeries">查询</el-button>
+                <el-button type="primary" icon="el-icon-edit" @click="handleAddCategory">新增分类</el-button>
+              </div>
+              <div class="table-panel choose-panel">
+                <div class="category-list" @drop.stop="handleDropList">
+                  <ul class="search-tree" @drop.stop="handleDropList">
+                    <li class="th-header">
+                      <p>代码</p>
+                      <p>类别</p>
+                      <p class="td-opt">操作</p>
+                    </li>
+                    <li class="tr" v-for="item in categoryTable" :key="item.id" @dragstart="drag($event, item)" draggable="true">
+                      <p v-html="item.id"></p>
+                      <p v-html="item.label"></p>
+                      <p class="td-opt">
+                        <el-button @click="handleClick(item)" type="primary" size="mini">编辑</el-button>
+                        <el-button @click="handledeleteCategory(item)" type="primary " size="mini">删除</el-button>
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+                <div class="flex-placeholder">
+                </div>
+                <div class="classify-tree">
+                  <geo-tree :data="treeData" :handleDragOver="handleDragOver" @node-drag-start="nodeDragStart" default-expand-all draggable :handleDrop="handleDrop" :allowDrop="allowdrop"></geo-tree>
+                </div>
+                <div class="flex-placeholder center-buttom">
+                  <el-button type="primary" @click="save">保存</el-button>
+                </div>
+              </div>
+              <el-dialog :title="formTitle" :visible.sync="categoryDialogFormVisible" width="400px">
+                <el-form :model="categoryForm" ref="categoryForm" :rules="rules">
+                  <el-form-item label="分类名称" :label-width="formLabelWidth" prop="name">
+                    <el-input v-model="categoryForm.name" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="分类编码" :label-width="formLabelWidth" prop="code">
+                    <el-input v-model="categoryForm.code" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="填充颜色" :label-width="formLabelWidth" prop="fillColor">
+                    <el-color-picker v-model="categoryForm.fillColor"></el-color-picker>
+                  </el-form-item>
+                  <el-form-item label="边框颜色" :label-width="formLabelWidth" prop="storkColor">
+                    <el-color-picker v-model="categoryForm.storkColor"></el-color-picker>
+                  </el-form-item>
+                  <el-form-item label="分类图标" :label-width="formLabelWidth">
+                    <el-upload
+                      class="avatar-uploader"
+                      action="https://jsonplaceholder.typicode.com/posts/"
+                      :headers="headers"
+                      :show-file-list="false"
+                      :on-success="handleAvatarSuccess"
+                      :before-upload="beforeAvatarUpload">
+                      <img v-show="categoryForm.icon" :src="categoryForm.icon" class="avatar">
+                      <i v-show="!categoryForm.icon" class="el-icon-plus avatar-uploader-icon"></i>
+                    </el-upload>
+                    <!--          action="http://192.168.1.135:7001/api/v1/common/upload"-->
+                  </el-form-item>
+                  <el-form-item label="备注说明" :label-width="formLabelWidth" prop="memo">
+                    <el-input type="textarea" placeholder="请输入内容" v-model="categoryForm.memo" :rows="4" maxlength="200" show-word-limit>
+                    </el-input>
+                  </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                  <el-button @click="categoryDialogFormVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="submitCategoryForm">确 定</el-button>
+                </div>
+              </el-dialog>
+            </div>
           </div>
         </div>
       </div>
       <div v-if="currentStep === 3" class="meta-setting step">
-        <div class="step-title">
-          创建分类体系
-          <el-button @click="">进入下一步</el-button>
-        </div>
-        <div class="content">
-          <div class="main-content category">
-            <div class='query-tool'>
-              <div class="search">
-                <!--<el-input-->
-                  <!--placeholder="请输入内容"-->
-                  <!--v-model="category" @keyup.enter.native="getRecord">-->
-                  <!--<i slot="prefix" class="el-input__icon el-icon-search"></i>-->
-                <!--</el-input>-->
-                <el-input
-                  placeholder="请输入内容"
-                  v-model="category">
-                  <i slot="prefix" class="el-input__icon el-icon-search"></i>
-                </el-input>
-              </div>
-              <el-button type="primary" icon="el-icon-edit" @click="getRecord">查询</el-button>
-              <el-button type="primary" icon="el-icon-edit" @click="handleAdd">新增分类</el-button>
-            </div>
-            <div class="table-panel choose-panel">
-              <div class="category-list" @drop.stop="handleDropList">
-                <ul class="search-tree" @drop.stop="handleDropList">
-                  <li class="th-header">
-                    <p>代码</p>
-                    <p>类别</p>
-                    <p class="td-opt">操作</p>
-                  </li>
-                  <li class="tr" v-for="item in categoryList" :key="item.id" @dragstart="drag($event, item)" draggable="true">
-                    <p v-html="item.id"></p>
-                    <p v-html="item.label"></p>
-                    <p class="td-opt">
-                      <el-button @click="handleClick(item)" type="primary" size="mini">编辑</el-button>
-                      <el-button @click="handledelete(item)" type="primary " size="mini">删除</el-button>
-                    </p>
-                  </li>
-                </ul>
-              </div>
-              <div class="flex-placeholder">
-              </div>
-              <div class="classify-tree">
-                <geo-tree :data="treeData" :handleDragOver="handleDragOver" @node-drag-start="nodeDragStart" default-expand-all draggable :handleDrop="handleDrop" :allowDrop="allowdrop"></geo-tree>
-              </div>
-              <div class="flex-placeholder center-buttom">
-                <el-button type="primary" @click="save">保存</el-button>
-              </div>
-            </div>
-            <el-dialog :title="formTitle" :visible.sync="dialogFormVisible" width="400px">
-              <el-form :model="form" ref="form" :rules="rules">
-                <el-form-item label="分类名称" :label-width="formLabelWidth" prop="name">
-                  <el-input v-model="form.name" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="分类编码" :label-width="formLabelWidth" prop="code">
-                  <el-input v-model="form.code" auto-complete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="填充颜色" :label-width="formLabelWidth" prop="fillColor">
-                  <el-color-picker v-model="form.fillColor"></el-color-picker>
-                </el-form-item>
-                <el-form-item label="边框颜色" :label-width="formLabelWidth" prop="storkColor">
-                  <el-color-picker v-model="form.storkColor"></el-color-picker>
-                </el-form-item>
-                <el-form-item label="分类图标" :label-width="formLabelWidth">
-                  <el-upload
-                    class="avatar-uploader"
-                    action="https://jsonplaceholder.typicode.com/posts/"
-                    :headers="headers"
-                    :show-file-list="false"
-                    :on-success="handleAvatarSuccess"
-                    :before-upload="beforeAvatarUpload">
-                    <img v-show="form.icon" :src="form.icon" class="avatar">
-                    <i v-show="!form.icon" class="el-icon-plus avatar-uploader-icon"></i>
-                  </el-upload>
-                  <!--          action="http://192.168.1.135:7001/api/v1/common/upload"-->
-                </el-form-item>
-                <el-form-item label="备注说明" :label-width="formLabelWidth" prop="memo">
-                  <el-input type="textarea" placeholder="请输入内容" v-model="form.memo" :rows="4" maxlength="200" show-word-limit>
-                  </el-input>
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="submitForm1">确 定</el-button>
-              </div>
-            </el-dialog>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -246,27 +251,34 @@ export default {
   },
   data () {
     return {
+      showDetail: false,
       id: 0,
       category: '',
       categoryList: [],
+      categoryTable: [],
       record: [],
       page: 1,
       opt: undefined,
       project: undefined,
-      catogeryList: [],
       treeData: [],
       defaultProps: {
         children: 'children',
         label: 'label'
       },
-      addClassifyDialogFormVisible: false,
+      classDialogFormVisible: false,
+      categoryDialogFormVisible: false,
       formLabelWidth: '120px',
-      form: {
+      categoryForm: {
         name: '',
         fillColor: 0,
         storkColor: '',
         icon: '',
         code: null,
+        memo: ''
+      },
+      classForm: {
+        taonomyName: '',
+        taonomyType: 0,
         memo: ''
       },
       rules: {
@@ -305,7 +317,9 @@ export default {
         algName: '',
         algorithmId: -1,
         dataId: -1
-      }
+      },
+      // 被选中的分类体系的Id
+      mainId: null
     }
   },
   methods: {
@@ -315,7 +329,7 @@ export default {
       this.form = _form
       this.formTitle = '修改分类'
       this.opt = 'edit'
-      this.dialogFormVisible = true
+      this.categoryDialogFormVisible = true
     },
     handleDragOver (e) {
       e.preventDefault()
@@ -370,34 +384,34 @@ export default {
       }
       return isLt2M
     },
-    addCategory ({ state, commit }, params) {
-      return new Promise((resolve, reject) => {
-        try {
-          addCategory(params).then(res => {
-            const data = res.data
-            resolve(data)
-          }).catch(err => {
-            reject(err)
-          })
-        } catch (error) {
-          reject(error)
-        }
-      })
-    },
-    putCategory ({ state, commit }, params) {
-      return new Promise((resolve, reject) => {
-        try {
-          putCategory(params).then(res => {
-            const data = res.data
-            resolve(data)
-          }).catch(err => {
-            reject(err)
-          })
-        } catch (error) {
-          reject(error)
-        }
-      })
-    },
+    // addCategory ({ state, commit }, params) {
+    //   return new Promise((resolve, reject) => {
+    //     try {
+    //       addCategory(params).then(res => {
+    //         const data = res.data
+    //         resolve(data)
+    //       }).catch(err => {
+    //         reject(err)
+    //       })
+    //     } catch (error) {
+    //       reject(error)
+    //     }
+    //   })
+    // },
+    // putCategory ({ state, commit }, params) {
+    //   return new Promise((resolve, reject) => {
+    //     try {
+    //       putCategory(params).then(res => {
+    //         const data = res.data
+    //         resolve(data)
+    //       }).catch(err => {
+    //         reject(err)
+    //       })
+    //     } catch (error) {
+    //       reject(error)
+    //     }
+    //   })
+    // },
     delCategory ({ state, commit }, id) {
       return new Promise((resolve, reject) => {
         try {
@@ -422,52 +436,53 @@ export default {
         }
       })
     },
-    submitForm1 () {
+    submitCategoryForm () {
       let _this = this
-      this.$refs['form'].validate((valid) => {
+      this.$refs['categoryForm'].validate((valid) => {
         if (valid) {
           let promise
           if (_this.opt === 'add') {
-            promise = _this.addCategory(_this.form)
+            promise = addCategory(_this.categoryForm)
           } else {
-            promise = _this.putCategory(_this.form)
+            promise = _this.putCategory(_this.categoryForm)
           }
           promise.then((response) => {
-            if (response && response.code === _this.$config.statusCode) {
-              _this.getRecord()
+            debugger
+            if (response && response.data.code === _this.$config.statusCode) {
+              _this.getCatogeries()
             } else {
               _this.$notify.error({ title: '错误', message: response.message })
             }
           }).catch((response) => {
             // console.log(response)
           })
-          _this.dialogFormVisible = false
+          _this.categoryDialogFormVisible = false
         } else {
           return false
         }
       })
     },
-    getRecord () {
+    getCatogeries () {
       const _this = this
       let query = {
         mainId: this.mainId
       }
       if (this.category) query.name = this.category
       getCategoryList(query).then((response) => {
-        if (response && response.code === _this.$config.statusCode) {
-          const list = response.data.list
+        if (response && response.data.code === _this.$config.statusCode) {
+          const list = response.data.data.list
           _this.record = list
-          _this.categoryList = list.map((o) => {
+          _this.categoryTable = list.map((o) => {
             return {
               id: o.id,
               label: o.name,
               parentId: o.parentId
             }
           })
-          _this.categoryList = _this.categoryList.filter((o) => {
+          _this.categoryList = _this.categoryTable.filter((o) => {
             return isNull(o.parentId)
           })
-          const tree = _this.categoryList.filter((o) => {
+          const tree = _this.categoryTable.filter((o) => {
             return !isNull(o.parentId)
           })
           _this.treeData = generateTree(tree, param)
@@ -504,7 +519,7 @@ export default {
       const putData = []
       for (let i = 0; i < list.length; i++) {
         const item = list[i]
-        let treeNode = this.categoryList.find((o) => {
+        let treeNode = this.categoryTable.find((o) => {
           return o.id === item.id
         })
         if (treeNode) {
@@ -513,8 +528,10 @@ export default {
           }
         }
       }
-      this.putCategory({ data: putData }).then((response) => {
-        if (response && response.code === _this.$config.statusCode) {
+      console.log(putData)
+      putCategory({ data: putData }).then((response) => {
+        debugger
+        if (response && response.data.code === _this.$config.statusCode) {
           _this.$notify.success({ title: '提示', message: '节点数保存成功！' })
         } else {
           _this.$notify.error({ title: '错误', message: response.message })
@@ -523,11 +540,11 @@ export default {
         // console.log(response)
       })
     },
-    handledelete (row) {
+    handledeleteCategory (row) {
       const _this = this
       this.delCategory(row.id).then((response) => {
         if (response && response.code === _this.$config.statusCode) {
-          _this.getRecord()
+          _this.getCatogeries()
         } else {
           _this.$notify.error({ title: '错误', message: response.message })
         }
@@ -535,8 +552,8 @@ export default {
         // console.log(response)
       })
     },
-    handleAdd () {
-      this.form = {
+    handleAddCategory () {
+      this.categoryForm = {
         name: '',
         fillColor: '',
         storkColor: '',
@@ -547,12 +564,12 @@ export default {
       }
       this.formTitle = '新增分类'
       this.opt = 'add'
-      this.dialogFormVisible = true
+      this.categoryDialogFormVisible = true
     },
     init () {
-      this.getRecord2()
+      this.getClassRecord()
     },
-    getRecord2 () {
+    getClassRecord () {
       const _this = this
       let query = {
         customType: 2,
@@ -574,11 +591,11 @@ export default {
         // console.log(response)
       })
     },
-    handleClick2 (row) {
+    editClass (row) {
       this.form = row
       this.formTitle = '修改分类'
       this.opt = 'edit'
-      this.dialogFormVisible = true
+      this.classDialogFormVisible = true
     },
     handleClone (row) {
       //
@@ -586,25 +603,28 @@ export default {
     handleFreeze (row) {
       //
     },
-    handleAdd2 () {
-      this.form = {
+    handleAddClass () {
+      this.classForm = {
         taonomyName: '',
         taonomyType: 0,
         memo: ''
       }
       this.formTitle = '新增分类'
       this.opt = 'add'
-      this.addClassifyDialogFormVisible = true
+      this.classDialogFormVisible = true
     },
     handleDetail (row) {
-      this.$router.push({ name: 'Category', params: { id: row.id } })
+      // this.$router.push({ name: 'Category', params: { id: row.id } })
+      this.mainId = row.id
+      this.showDetail = true
+      this.getCatogeries()
     },
     handledelete2 (row) {
       const _this = this
       this.delCategory(row.id).then((response) => {
         const { data } = response
         if (data && data.code === _this.$config.statusCode) {
-          _this.getRecord2()
+          _this.getClassRecord()
         } else {
           _this.$notify.error({ title: '错误', message: data.message })
         }
@@ -614,28 +634,27 @@ export default {
     },
     submitForm2 () {
       let _this = this
-      this.$refs['form'].validate((valid) => {
+      this.$refs['classForm'].validate((valid) => {
         if (valid) {
           let promise
           // 分类体系类别为自定义分类体系
           _this.form.customType = 2
           if (_this.opt === 'add') {
-            promise = addClassify(_this.form)
+            promise = addClassify(_this.classForm)
           } else {
-            promise = PutClassify(_this.form)
+            promise = PutClassify(_this.classForm)
           }
           promise.then((response) => {
             const { data } = response
-            console.log('here')
             if (data && data.code === _this.$config.statusCode) {
-              _this.getRecord2()
+              _this.getClassRecord()
             } else {
               _this.$notify.error({ title: '错误', message: data.message })
             }
           }).catch((response) => {
             // console.log(response)
           })
-          _this.addClassifyDialogFormVisible = false
+          _this.classDialogFormVisible = false
         } else {
           return false
         }

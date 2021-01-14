@@ -428,7 +428,7 @@ export default {
     getBadge (status) {
       return status === '公开' ? 'success' : 'secondary'
     },
-    getRecord (option) {
+    getCatogeries (option) {
       let url = this.api.list
       this.loading = true
       this.option = option
@@ -816,7 +816,7 @@ export default {
       // window.open(router.href, '_blank')
     },
     refresh () {
-      this.getRecord(this.option)
+      this.getCatogeries(this.option)
     },
     showCol () {
       this.showColList = true
@@ -893,7 +893,7 @@ export default {
       this.$http.post(url, option).then((response) => {
         if (response && response.data.code === 1) {
           _this.$notify({title: '提示', message: '收藏操作成功!', type: 'success'})
-          // _this.getRecord()
+          // _this.getCatogeries()
         } else {
           _this.$notify.error({title: '错误', message: response.data.msg})
         }
@@ -907,7 +907,7 @@ export default {
     refreshRecord () {
       switch (this.queryType) {
         case 'default':
-          this.getRecord(this.option)
+          this.getCatogeries(this.option)
           break
         case 'spaceQuery':
           this.getRecordSpace()

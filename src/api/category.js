@@ -24,21 +24,21 @@ export const getCategoryList = (params) => {
 
 export const getCategoryById = (id) => {
   return axios.request({
-    url: ApiUrl + module + '/getById/' + id,
+    url: config.ApiUrl + module + '/getById/' + id,
     method: 'get'
   })
 }
 
 export const addCategory = (params) => {
   return axios.request({
-    url: baseUrl1 + 'category',
+    url: config.baseUrl1 + 'category',
     data: params,
     method: 'post'
   })
 }
 export const putCategory = (params) => {
   return axios.request({
-    url: baseUrl1 + 'category/batch',
+    url: config.baseUrl1 + 'category/batch',
     data: params,
     method: 'put'
   })
@@ -46,7 +46,7 @@ export const putCategory = (params) => {
 
 export const delCategory = (id) => {
   return axios.request({
-    url: baseUrl + 'category/delete/' + id,
+    url: config.baseUrl + 'category/delete/' + id,
     method: 'delete'
   })
 }
