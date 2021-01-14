@@ -1,6 +1,6 @@
 <template>
   <div class="map-container">
-    <el-button class="map-back" size="small" @click="returnBack" v-if="mapType==='country'">退回</el-button>
+    <el-button class="map-back" size="small" @click.stop="returnBack" v-if="mapType==='country'">退回</el-button>
     <div class="map-selector" id="selector-map"></div>
     <div class="map-selector-tips">
       <label>当前选择：</label> <label v-html="currentArea.name"></label>
@@ -86,7 +86,7 @@ export default {
         })
         polygonLayer.on('dblclick', (e) => {
           let properties = e.layer.feature.properties
-          if (properties.name === 'China' || properties.name === 'United States of America') {
+          if (properties.name === 'China' || properties.name === 'America') {
             _this.loadCountry(properties)
           }
         })
@@ -97,6 +97,7 @@ export default {
     loadCountry (properties) {
       const _this = this
       let name = properties.name
+      console.log(name)
       json(`/static/${name}.json`).then((data, err) => {
         if (err) {
           return false
