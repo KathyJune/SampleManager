@@ -3,7 +3,7 @@
     <el-button class="map-back" size="small" @click.stop="returnBack" v-if="mapType==='country'">退回</el-button>
     <div class="map-selector" id="selector-map"></div>
     <div class="map-selector-tips">
-      <label>当前选择：</label> <label v-html="currentArea.name"></label>
+      <label>当前选择：</label> <label v-html="currentArea.name || currentArea.NAME"></label>
     </div>
   </div>
 

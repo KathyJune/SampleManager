@@ -59,13 +59,22 @@ module.exports = {
           '^/sampleDetail': '/'
         }
       },
-      '/sampleSets': {
-        target: 'http://192.168.1.119:10088',
+      '/sample': {
+        target: 'http://192.168.1.114:10088',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
         pathRewrite: {
-          '^/sampleSets': '/'
+          '^/sample': '/'
+        }
+      },
+      '/vectorTile': {
+        target: 'http://192.168.1.198:10087',
+        ws: true,
+        changeOrigin: true,
+        proxyTimeout: 10000,
+        pathRewrite: {
+          '^/vectorTile': '/'
         }
       },
       '/api': {

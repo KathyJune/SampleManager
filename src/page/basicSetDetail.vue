@@ -62,15 +62,16 @@ export default {
       const _this = this
       try {
         _this.map = L.map('map', {
-          center: [28.095001, 112.93808],
+          center: [34.15, 85.66],
           zoom: 13,
           zoomControl: false
         })
-        L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        // L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        L.tileLayer('/vectorTile/data/Alabama/{z}/{x}/{y}.pbf').addTo(_this.map)
       } catch (e) {
         console.log(e)
       }
-    },
+    }
   },
   data () {
     return {

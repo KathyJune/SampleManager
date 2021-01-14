@@ -8,6 +8,7 @@
 // let host = 'http://' + _config.host + ':8089'http://192.168.1.135:7001/api/v1/common/login
 const ApiUrl = process.env.NODE_ENV === 'production' ? 'http://192.168.1.177:7001/api/v1' : 'http://192.168.1.104:7001/api/v1'
 const baseUrl1 = ApiUrl + '/sample/'
+const sample = '/sample'
 const rootUrl1 = '/api'
 const samplePreview = '/samplePreview'
 const sampleDetail = '/sampleDetail'
@@ -31,6 +32,7 @@ export default {
     size: 20
   },
   ApiUrl: ApiUrl,
+  sample: sample,
   root1: rootUrl1,
   baseUrl1: baseUrl1,
   samplePreview: samplePreview,

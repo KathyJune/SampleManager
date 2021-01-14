@@ -54,6 +54,7 @@
 <script>
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import { sampleStatus, setList } from './sampleData'
+import { getBasicList, getBasicDetail } from 'src/api/sample'
 import echarts from 'echarts'
 import MapSelector from 'src/components/mapSelector'
 export default {
@@ -89,6 +90,19 @@ export default {
       this.setList = setList
       this.sampleStatus = sampleStatus
       this.renderChart()
+      this.getSetList()
+    },
+    getSetList () {
+      let url = this.$api.sample + '/sp/basic/sampleset/list'
+      this.$http.post(url, { type: 0, zoneCode: 'Alabama', page: 0, size: 20 }).then((response) => {
+        if (response && response.status === 200) {
+          debugger
+        } else {
+          this.$notify.error({ title: '错误', message: response.message })
+        }
+      }).catch((response) => {
+        console.log(response)
+      })
     },
     renderChart () {
       this.sampleStatus.yAxis.data = this.setList.map((o) => o.name)
