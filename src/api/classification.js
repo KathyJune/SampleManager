@@ -4,8 +4,8 @@
  * @description
  */
 import axios from '@/libs/api.request'
-import { Pagination, baseUrl } from './config'
-const _baseUrl = baseUrl + 'classify'
+import config from './config'
+const _baseUrl = config.baseUrl1 + 'classify'
 
 export const getClassify = () => {
   return axios.request({
@@ -14,7 +14,7 @@ export const getClassify = () => {
   })
 }
 export const getClassifyList = (params) => {
-  params = Object.assign({}, Pagination, params)
+  params = Object.assign({}, config.Pagination, params)
   return axios.request({
     url: _baseUrl + '/list',
     data: params,

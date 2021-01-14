@@ -25,12 +25,12 @@
             </el-card>
           </div>
           <div class="card-container">
-            <el-form class="create-form demo-ruleForm" :model="addSessionParams" :rules="rules" ref="ruleForm" label-width="100px">
+            <el-form class="create-form demo-ruleForm" :model="addSessionParams" :rules="rules1" ref="ruleForm" label-width="100px">
               <el-form-item label="名称" prop="name">
                 <el-input v-model="addSessionParams.name"></el-input>
               </el-form-item>
               <el-form-item label="描述" prop="desc">
-                <el-input type="textarea" :rows="2" v-model="addSessionParams.memo"></el-input>
+                <el-input type="textarea" rows="2" v-model="addSessionParams.memo"></el-input>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
@@ -59,7 +59,7 @@
             </div>
             <div class="table-panel choose-panel">
               <el-table
-                :data="tableData"
+                :data="classList"
                 border
                 style="width: 100%">
                 <el-table-column
@@ -100,7 +100,7 @@
                 </el-table-column>
               </el-table>
             </div>
-            <el-dialog :title="formTitle" :visible.sync="dialogFormVisible" width="400px">
+            <el-dialog :title="formTitle" :visible.sync="addClassifyDialogFormVisible" width="400px">
               <el-form :model="form" ref="form" :rules="rules">
                 <el-form-item label="分类名称" :label-width="formLabelWidth" prop="taonomyName">
                   <el-input v-model="form.taonomyName" auto-complete="off"></el-input>
@@ -115,7 +115,7 @@
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button @click="addClassifyDialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="submitForm2">确 定</el-button>
               </div>
             </el-dialog>
@@ -217,11 +217,10 @@
 </template>
 
 <script>
-import { addCategory, putCategory, delCategory } from '@/api/category'
+import { addCategory, putCategory, delCategory, getCategoryList } from '@/api/category'
 import { generateTree, generateList, isNull } from '@/libs/factory'
 import GeoTree from 'src/components/geo-tree'
-import { getCategoryList } from '@/api/category'
-import {getList} from '@/api/common'
+import { getList } from '@/api/common'
 import { getClassifyList, addClassify, PutClassify } from 'src/api/classification'
 import Api from 'src/api/config'
 // import { dateFormart } from 'src/libs/factory'
@@ -254,13 +253,13 @@ export default {
       page: 1,
       opt: undefined,
       project: undefined,
-      tableData: [],
+      catogeryList: [],
       treeData: [],
       defaultProps: {
         children: 'children',
         label: 'label'
       },
-      dialogFormVisible: false,
+      addClassifyDialogFormVisible: false,
       formLabelWidth: '120px',
       form: {
         name: '',
@@ -291,7 +290,7 @@ export default {
       currentStep: 1,
       // 地物提取还是变化监测任务
       sessionType: '',
-      rules: {
+      rules1: {
         name: [ { required: true, message: '请输入名称', trigger: 'blur' },
           { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' } ],
         memo: [ { message: '请填写描述信息', trigger: 'blur' } ]
@@ -451,26 +450,24 @@ export default {
     getRecord () {
       const _this = this
       let query = {
-        page: this.page,
-        size: 500,
         mainId: this.mainId
       }
       if (this.category) query.name = this.category
-      this.getCategoryList(query).then((response) => {
+      getCategoryList(query).then((response) => {
         if (response && response.code === _this.$config.statusCode) {
           const list = response.data.list
           _this.record = list
-          _this.tableData = list.map((o) => {
+          _this.categoryList = list.map((o) => {
             return {
               id: o.id,
               label: o.name,
               parentId: o.parentId
             }
           })
-          _this.categoryList = _this.tableData.filter((o) => {
+          _this.categoryList = _this.categoryList.filter((o) => {
             return isNull(o.parentId)
           })
-          const tree = _this.tableData.filter((o) => {
+          const tree = _this.categoryList.filter((o) => {
             return !isNull(o.parentId)
           })
           _this.treeData = generateTree(tree, param)
@@ -507,7 +504,7 @@ export default {
       const putData = []
       for (let i = 0; i < list.length; i++) {
         const item = list[i]
-        let treeNode = this.tableData.find((o) => {
+        let treeNode = this.categoryList.find((o) => {
           return o.id === item.id
         })
         if (treeNode) {
@@ -553,17 +550,23 @@ export default {
       this.dialogFormVisible = true
     },
     init () {
+      this.getRecord2()
     },
     getRecord2 () {
       const _this = this
       let query = {
+        customType: 2,
         page: 0,
-        size: 20
+        size: 500
       }
       getClassifyList(query).then((response) => {
         const { data } = response
-        if (data && data.code === _this.$config.statusCode) {
-          _this.tableData = data.data.list
+        // debugger
+        if (data && data.code === 200) {
+          _this.classList = []
+          console.log(_this.classList)
+          _this.classList = data.data.list
+          console.log(_this.classList)
         } else {
           _this.$notify.error({ title: '错误', message: data.message })
         }
@@ -591,7 +594,7 @@ export default {
       }
       this.formTitle = '新增分类'
       this.opt = 'add'
-      this.dialogFormVisible = true
+      this.addClassifyDialogFormVisible = true
     },
     handleDetail (row) {
       this.$router.push({ name: 'Category', params: { id: row.id } })
@@ -614,6 +617,8 @@ export default {
       this.$refs['form'].validate((valid) => {
         if (valid) {
           let promise
+          // 分类体系类别为自定义分类体系
+          _this.form.customType = 2
           if (_this.opt === 'add') {
             promise = addClassify(_this.form)
           } else {
@@ -621,6 +626,7 @@ export default {
           }
           promise.then((response) => {
             const { data } = response
+            console.log('here')
             if (data && data.code === _this.$config.statusCode) {
               _this.getRecord2()
             } else {
@@ -629,7 +635,7 @@ export default {
           }).catch((response) => {
             // console.log(response)
           })
-          _this.dialogFormVisible = false
+          _this.addClassifyDialogFormVisible = false
         } else {
           return false
         }

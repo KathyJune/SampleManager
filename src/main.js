@@ -15,6 +15,7 @@ import axios from './http'
 import VueClipboard from 'vue-clipboard2'
 // import io from 'socket.io-client'
 import ElementUI from 'element-ui'
+import config from '@/config'
 
 import Bus from 'src/bus'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -40,6 +41,7 @@ Vue.factory = Vue.prototype.$factory = factory
 Vue.prototype.$L = window.L
 Vue.prototype.$bus = Bus
 Vue.prototype.$socket = socket
+Vue.prototype.$config = config
 
 Vue.filter('parseJson', function (content) {
   let retVal = []

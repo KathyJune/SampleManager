@@ -1,17 +1,22 @@
 import axios from 'axios'
+import { getToken } from '@/libs/util'
 // import { Spin } from 'iview'
 
 class HttpRequest {
   constructor (baseUrl) {
     this.baseUrl = baseUrl
+    this.token = getToken()
+    this.headers = {
+      common: {}
+    }
+    this.instance = undefined
     this.queue = {}
   }
   getInsideConfig () {
     const config = {
       baseURL: this.baseUrl,
-      headers: {
-        //
-      }
+      headers: this.headers,
+      withCredentials: false
     }
     return config
   }
@@ -45,9 +50,23 @@ class HttpRequest {
   }
   request (options) {
     const instance = axios.create()
+    this.token && (instance.defaults.headers.common['Authorization'] = 'Bearer ' + this.token)
     options = Object.assign(this.getInsideConfig(), options)
     this.interceptors(instance, options.url)
     return instance(options)
+  }
+  setToken (token) {
+    this.token = token
+  }
+  sendAll (arr) {
+    if (Array.isArray(arr)) {
+      return axios.all(arr).then(axios.spread(function (...res) {
+        // 请求全部都执行完成
+        return Promise.resolve(res)
+      }))
+    } else {
+      throw new Error('参数错误！')
+    }
   }
 }
 export default HttpRequest

@@ -4,18 +4,19 @@
  * @description
  */
 import axios from '@/libs/api.request'
-import { ApiUrl, baseUrl1, Pagination} from './config'
+import config from './config'
 
 export const getCategory = (id) => {
   return axios.request({
-    url: baseUrl1 + module + '/list/' + id,
+    url: config.baseUrl1 + module + '/list/' + id,
     method: 'get'
   })
 }
 export const getCategoryList = (params) => {
-  params = Object.assign({}, Pagination, params)
+  console.log(config.ApiUrl)
+  params = Object.assign({}, config.Pagination, params)
   return axios.request({
-    url: baseUrl1 + 'category/list',
+    url: config.baseUrl1 + 'category/list',
     data: params,
     method: 'post'
   })
@@ -49,4 +50,3 @@ export const delCategory = (id) => {
     method: 'delete'
   })
 }
-

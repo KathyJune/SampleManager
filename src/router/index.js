@@ -83,7 +83,7 @@ const router = new Router({
             access: ['admin'],
             label: '样本集创建'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/training'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/createSet'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()

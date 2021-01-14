@@ -32,7 +32,7 @@ export default {
   },
   ApiUrl: ApiUrl,
   root1: rootUrl1,
-  baseUrl: baseUrl1,
+  baseUrl1: baseUrl1,
   samplePreview: samplePreview,
   sampleDetail: sampleDetail,
   sampleSets: sampleSets,
