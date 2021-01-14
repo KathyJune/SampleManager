@@ -30,6 +30,7 @@ import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import 'leaflet.pm'
 import { sampleDistributionOption } from './sampleData'
 import echarts from 'echarts'
+import 'leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js'
 const L = window.L
 export default {
   name: 'basicSetDetail',
@@ -66,8 +67,31 @@ export default {
           zoom: 13,
           zoomControl: false
         })
+        let features = []
+        let url = '/vectorTile/data/Alabama/{z}/{x}/{y}.pbf'
+        let vectorTileOptions = {
+          layerURL: url,
+          rendererFactory: L.canvas.tile,
+          tms: true,
+          vectorTileLayerStyles: function () {
+            return {
+              color: '#778899',
+              width: 1,
+              fillColor: 'yellow',
+              fill: true
+            }
+          },
+          interactive: true, // 开启VectorGrid触发mouse/pointer事件
+          getFeatureId: function (f) {
+            features.push(f)
+            if (f.properties.Handle === '1127C1') {
+              console.log(f)
+            }
+            return f.properties.Handle
+          }
+        }
         // L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
-        L.tileLayer('/vectorTile/data/Alabama/{z}/{x}/{y}.pbf').addTo(_this.map)
+        L.vectorGrid.protobuf(url, vectorTileOptions).addTo(_this.map)
       } catch (e) {
         console.log(e)
       }
@@ -87,7 +111,7 @@ export default {
         suppressScrollX: true,
         wheelPropagation: false,
         interceptRailY: styles => ({ ...styles, height: 0 })
-      },
+      }
     }
   }
 }
