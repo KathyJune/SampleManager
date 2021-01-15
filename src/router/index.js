@@ -37,7 +37,7 @@ const router = new Router({
           }
         },
         {
-          path: 'basicSetDetail',
+          path: 'basicSetDetail/:id',
           name: 'basicSetDetail',
           meta: {
             access: ['admin'],

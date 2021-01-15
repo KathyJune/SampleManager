@@ -39,6 +39,12 @@ export const sampleDistributionOption = {
   ]
 }
 export const sampleStatus = {
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
   title: {
     text: '数据集样本数量统计',
     x: 'center',

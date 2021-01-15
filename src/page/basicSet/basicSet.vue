@@ -124,7 +124,7 @@ export default {
       this.$router.push({ name: 'SetCreator', params: { queryFactor: this.queryFactor } })
     },
     inspectSet (item) {
-      this.$router.push({ name: 'basicSetDetail', params: { setId: item.id } })
+      this.$router.push({ name: 'basicSetDetail', params: { id: item.id } })
     },
     renderChart () {
       this.sampleStatus.yAxis.data = this.setList.map((o) => o.name)

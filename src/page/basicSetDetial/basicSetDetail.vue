@@ -43,22 +43,25 @@ export default {
   },
   methods: {
     init () {
-      this.setId = this.$route.params.setId
+      this.setId = this.$route.params.id
       console.log(this.setId)
       this.getSetDetail()
-      this.initMap()
+      // this.initMap()
     },
     // TODO: 获取基础样本集的信息包括：名称（name, desc, time, classDis(类别分布), tileUrl(矢量瓦片地址).
     getSetDetail () {
-      // this.setInfo.classDis = sampleDistributionOption
+      this.setInfo.classDis = sampleDistributionOption
       let url = this.$api.sample + '/sp/basic/sampleset/' + this.setId
       this.$http.get(url).then((response) => {
         if (response && response.status === 200) {
           this.setInfo.name = response.data.data.name
           this.setInfo.desc = response.data.data.desc
+          this.setInfo.vectorTile = response.data.data.vectorTile
+          this.setInfo.classDis.yAxis.data = response.data.data.classTypeGroupSum.map((o) => o.type)
+          this.setInfo.classDis.series.data = response.data.data.classTypeGroupSum.map((o) => o.count)
           // this.setInfo.time =
-          this.setInfo.classDis = response.data.data.classTypeGroupSum
           this.initChart()
+          this.initMap()
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }
@@ -71,53 +74,24 @@ export default {
     },
     initChart () {
       let myChart = echarts.init(document.getElementById('chart'))
-      console.log(this.setInfo.classDis)
       myChart.setOption(this.setInfo.classDis)
     },
     initMap () {
       const _this = this
       try {
-        let crs = new L.Proj.CRS('EPSG:4326',
-          '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-          {
-            resolutions: [
-              4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8
-            ],
-            origin: [ -1200000.000000, 8500000.000000 ],
-            bounds: L.bounds([-1200000.000000, 8500000.000000], [4305696.000000, 2994304.000000])
-          })
         _this.map = L.map('map', {
           // -86.21315,32.392138
-          // crs: crs,
-          center: [-32.392138, -86.21315],
-          zoom: 13,
+          center: [32.392138, -86.21315],
+          zoom: 15,
           zoomControl: false
         })
-        let features = []
-        let url = '/vectorTile/data/Alabama/{z}/{x}/{-y}.pbf'
-        let vectorTileOptions = {
-          layerURL: url,
-          rendererFactory: L.canvas.tile,
-          tms: true,
-          vectorTileLayerStyles: function () {
-            return {
-              color: '#778899',
-              width: 1,
-              fillColor: 'yellow',
-              fill: true
-            }
-          },
-          interactive: true, // 开启VectorGrid触发mouse/pointer事件
-          getFeatureId: function (f) {
-            features.push(f)
-            if (f.properties.Handle === '1127C1') {
-              console.log(f)
-            }
-            return f.properties.Handle
-          }
-        }
-        L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
-        L.vectorGrid.protobuf(url, vectorTileOptions).addTo(_this.map)
+        let osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        let osm = new L.TileLayer(osmUrl, { minZoom: 5, maxZoom: 18 })
+        _this.map.addLayer(osm)
+        let url = this.setInfo.vectorTile
+        console.log(url)
+        // L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        L.vectorGrid.protobuf(url).addTo(_this.map)
       } catch (e) {
         console.log(e)
       }
