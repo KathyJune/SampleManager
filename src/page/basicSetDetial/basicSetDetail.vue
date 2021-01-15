@@ -65,7 +65,8 @@ export default {
       const _this = this
       try {
         _this.map = L.map('map', {
-          center: [34.15, 85.66],
+          // -86.21315,32.392138
+          center: [-32.392138, -86.21315],
           zoom: 13,
           zoomControl: false
         })
