@@ -69,10 +69,10 @@ export default {
   data () {
     return {
       queryFactor: {
-        startTime: false,
-        endTime: false,
-        geoCode: '',
-        type: '1',
+        startTime: '2020/1/10',
+        endTime: '2021/01/11',
+        zoneCode: '',
+        type: '0',
         page: 0,
         size: 20
       },
@@ -101,16 +101,18 @@ export default {
     selectArea (item) {
       // debugger
       // 之后需要换成code
-      this.queryFactor.geoCode = item.name || item.NAME
+      this.queryFactor.zoneCode = item.name || item.NAME
     },
     getSetList () {
       let url = this.$api.sample + '/sp/basic/sampleset/list'
-      console.log(this.queryFactor)
+      this.queryFactor.startTime = new Date(this.queryFactor.startTime)
+      this.queryFactor.endTime = new Date(this.queryFactor.endTime)
+      this.queryFactor.type = parseInt(this.queryFactor.type)
       this.$http.post(url, this.queryFactor).then((response) => {
         if (response && response.status === 200) {
           this.setList = response.data.data.list
           this.renderChart()
-          debugger
+          this.queryFactor.type = this.queryFactor.type.toString()
         } else {
           this.$notify.error({ title: '错误', message: response.message })
         }

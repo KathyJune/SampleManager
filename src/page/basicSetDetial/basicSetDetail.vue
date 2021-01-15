@@ -50,8 +50,21 @@ export default {
     },
     // TODO: 获取基础样本集的信息包括：名称（name, desc, time, classDis(类别分布), tileUrl(矢量瓦片地址).
     getSetDetail () {
-      this.setInfo.classDis = sampleDistributionOption
-      this.initChart()
+      // this.setInfo.classDis = sampleDistributionOption
+      let url = this.$api.sample + '/sp/basic/sampleset/' + this.setId
+      this.$http.get(url).then((response) => {
+        if (response && response.status === 200) {
+          this.setInfo.name = response.data.data.name
+          this.setInfo.desc = response.data.data.desc
+          // this.setInfo.time =
+          this.setInfo.classDis = response.data.data.classTypeGroupSum
+          this.initChart()
+        } else {
+          this.$notify.error({ title: '错误', message: response.message })
+        }
+      }).catch((response) => {
+        console.log(response)
+      })
     },
     // TODO: 加载后台返回的矢量瓦片地址
     renderTileUrl () {
@@ -64,14 +77,24 @@ export default {
     initMap () {
       const _this = this
       try {
+        let crs = new L.Proj.CRS('EPSG:4326',
+          '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+          {
+            resolutions: [
+              4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8
+            ],
+            origin: [ -1200000.000000, 8500000.000000 ],
+            bounds: L.bounds([-1200000.000000, 8500000.000000], [4305696.000000, 2994304.000000])
+          })
         _this.map = L.map('map', {
           // -86.21315,32.392138
+          // crs: crs,
           center: [-32.392138, -86.21315],
           zoom: 13,
           zoomControl: false
         })
         let features = []
-        let url = '/vectorTile/data/Alabama/{z}/{x}/{y}.pbf'
+        let url = '/vectorTile/data/Alabama/{z}/{x}/{-y}.pbf'
         let vectorTileOptions = {
           layerURL: url,
           rendererFactory: L.canvas.tile,
@@ -93,7 +116,7 @@ export default {
             return f.properties.Handle
           }
         }
-        // L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
+        L.esri.basemapLayer('Imagery').addTo(this.map) // 定义basemapLayer并将其加载到地图容器中
         L.vectorGrid.protobuf(url, vectorTileOptions).addTo(_this.map)
       } catch (e) {
         console.log(e)

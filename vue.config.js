@@ -60,7 +60,7 @@ module.exports = {
         }
       },
       '/sample': {
-        target: 'http://192.168.1.114:10088',
+        target: 'http://192.168.1.118:10088',
         ws: true,
         changeOrigin: true,
         proxyTimeout: 10000,
