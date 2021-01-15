@@ -328,9 +328,9 @@ export default {
 }
 </script>
 <style>
-  @import "~leaflet.pm/dist/leaflet.pm.css";
+  @import "../../../node_modules/leaflet.pm/dist/leaflet.pm.css";
 </style>
 <style lang="scss">
-  @import "sampleManager.scss";
-  @import "sampleSetManager.scss";
+  @import "../sampleManager";
+  @import "sampleSetManager";
 </style>

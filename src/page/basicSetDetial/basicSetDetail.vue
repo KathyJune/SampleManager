@@ -28,7 +28,7 @@
 import { Sidebar as AppSidebar } from '@coreui/vue'
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import 'leaflet.pm'
-import { sampleDistributionOption } from './sampleData'
+import { sampleDistributionOption } from '../sampleData'
 import echarts from 'echarts'
 import 'leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js'
 const L = window.L
@@ -43,6 +43,8 @@ export default {
   },
   methods: {
     init () {
+      this.setId = this.$route.params.setId
+      console.log(this.setId)
       this.getSetDetail()
       this.initMap()
     },
@@ -99,6 +101,7 @@ export default {
   },
   data () {
     return {
+      setId: false,
       setInfo: {
         name: '谷歌美国加州数据集',
         desc: '本样本集创建于2021-01-03，包含美国加州所有地物的信息，地物信息采集于2018年',
@@ -117,11 +120,11 @@ export default {
 }
 </script>
 <style>
-  @import "../../node_modules/leaflet.pm/dist/leaflet.pm.css";
+  @import "../../../node_modules/leaflet.pm/dist/leaflet.pm.css";
 </style>
 <style lang="scss">
-  @import "sampleManager.scss";
-  @import "sampleSetManager.scss";
+  @import "../sampleManager";
+  @import "../sampleSetManager/sampleSetManager";
   @import "basicSetDetail";
-  @import "layout";
+  @import "../layout";
 </style>

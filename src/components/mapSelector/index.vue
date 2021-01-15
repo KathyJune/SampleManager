@@ -82,6 +82,7 @@ export default {
           if (_this.selectedLayer && _this.selectedLayer.setStyle) _this.selectedLayer.setStyle(defaultPolyStyle)
           _this.selectedLayer = e.layer
           _this.currentArea = e.layer.feature.properties
+          _this.$emit('selectArea', _this.currentArea)
           _this.selectedLayer.setStyle(selectedPolyStyle)
         })
         polygonLayer.on('dblclick', (e) => {

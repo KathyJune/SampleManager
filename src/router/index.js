@@ -30,7 +30,7 @@ const router = new Router({
             access: ['admin'],
             label: '基础样本集'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSet'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSet/basicSet'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()
@@ -43,7 +43,7 @@ const router = new Router({
             access: ['admin'],
             label: '基础样本集详情'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSetDetail'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/basicSetDetial/basicSetDetail'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()
@@ -69,7 +69,7 @@ const router = new Router({
             access: ['admin'],
             label: '样本集管理'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleSetManager'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/sampleSetManager/sampleSetManager'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()
@@ -83,7 +83,7 @@ const router = new Router({
             access: ['admin'],
             label: '样本集创建'
           },
-          component: () => import(/* webpackChunkName: "page" */ 'src/page/createSet'),
+          component: () => import(/* webpackChunkName: "page" */ 'src/page/createSet/createSet'),
           beforeLeave: (to, from, next) => {
             this.refreshTimer = undefined
             next()

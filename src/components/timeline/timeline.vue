@@ -26,7 +26,7 @@ export default {
     this.activeIndex = typeof this.defaultIndex !== 'undefined' ? this.year.length - 1 : null
   },
   methods: {
-    handleClick (item, index) {
+    handleEditCategory (item, index) {
       this.activeIndex = index
       this.$emit('year-change', item)
     },

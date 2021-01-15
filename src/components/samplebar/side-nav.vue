@@ -282,7 +282,7 @@ export default {
     scrollHandle (evt) {
       // console.log(evt)
     },
-    handleClick (tab, event) {
+    handleEditCategory (tab, event) {
       this.querySpace.space = 0
       this.$emit('tab-handle', tab.name)
     },

@@ -3,7 +3,7 @@
   <div class="flex-row">
     <div class="geo-picker">
       <el-card>
-        <map-selector></map-selector>
+        <map-selector @selectArea="selectArea"></map-selector>
       </el-card>
     </div>
     <div class="top-right-group">
@@ -28,7 +28,10 @@
             <el-radio v-model="queryFactor.type" label="0">地物提取</el-radio>
             <el-radio v-model="queryFactor.type" label="1">变化监测</el-radio>
           </div>
-          <el-button size="mini" type="primary">创建样本集</el-button>
+          <div>
+            <el-button @click="getSetList" size="mini" type="primary">检索</el-button>
+            <el-button @click="createSet" size="mini" type="primary">创建样本集</el-button>
+          </div>
         </div>
         <div>
         </div>
@@ -42,7 +45,7 @@
         <div style="padding: 10px;">
           <p v-html="item.name" class="box-card-title"></p>
           <div class="box-card-bottom clearfix">
-            <el-button type="primary" size="mini" class="button" @click="handleClick(item)" >查看</el-button>
+            <el-button type="primary" size="mini" class="button" @click="inspectSet(item)" >查看</el-button>
           </div>
         </div>
       </el-card>
@@ -53,10 +56,10 @@
 
 <script>
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
-import { sampleStatus, setList } from './sampleData'
+import { sampleStatus, setList } from '../sampleData'
 import { getBasicList, getBasicDetail } from 'src/api/sample'
 import echarts from 'echarts'
-import MapSelector from 'src/components/mapSelector'
+import MapSelector from 'src/components/mapSelector/index'
 export default {
   name: 'basicSet',
   components: {
@@ -69,7 +72,9 @@ export default {
         startTime: false,
         endTime: false,
         geoCode: '',
-        type: '1'
+        type: '1',
+        page: 0,
+        size: 20
       },
       psSettings: {
         maxScrollbarLength: 200,
@@ -92,10 +97,19 @@ export default {
       this.renderChart()
       this.getSetList()
     },
+    // 选中行政级别（国家/省）
+    selectArea (item) {
+      // debugger
+      // 之后需要换成code
+      this.queryFactor.geoCode = item.name || item.NAME
+    },
     getSetList () {
       let url = this.$api.sample + '/sp/basic/sampleset/list'
-      this.$http.post(url, { type: 0, zoneCode: 'Alabama', page: 0, size: 20 }).then((response) => {
+      console.log(this.queryFactor)
+      this.$http.post(url, this.queryFactor).then((response) => {
         if (response && response.status === 200) {
+          this.setList = response.data.data.list
+          this.renderChart()
           debugger
         } else {
           this.$notify.error({ title: '错误', message: response.message })
@@ -103,6 +117,12 @@ export default {
       }).catch((response) => {
         console.log(response)
       })
+    },
+    createSet () {
+      this.$router.push({ name: 'SetCreator', params: { queryFactor: this.queryFactor } })
+    },
+    inspectSet (item) {
+      this.$router.push({ name: 'basicSetDetail', params: { setId: item.id } })
     },
     renderChart () {
       this.sampleStatus.yAxis.data = this.setList.map((o) => o.name)
@@ -116,6 +136,6 @@ export default {
 </script>
 
 <style lang="scss">
-  @import "layout";
+  @import "../layout";
   @import "basicSet";
 </style>

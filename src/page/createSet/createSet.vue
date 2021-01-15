@@ -33,7 +33,7 @@
                 <el-input type="textarea" rows="2" v-model="addSessionParams.memo"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                <el-button type="primary" @click="submitSetForm('ruleForm')">立即创建</el-button>
                 <el-button @click="resetForm('ruleForm')">重置</el-button>
               </el-form-item>
             </el-form>
@@ -51,11 +51,11 @@
                 <div class="search">
                   <el-input
                     placeholder="请输入内容"
-                    v-model="category" @keyup.enter.native="getClassRecord">
+                    v-model="category" @keyup.enter.native="getClassList">
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                   </el-input>
                 </div>
-                <el-button type="primary" icon="el-icon-edit" @click="getClassRecord">查询</el-button>
+                <el-button type="primary" icon="el-icon-edit" @click="getClassList">查询</el-button>
                 <el-button type="primary" icon="el-icon-edit" @click="handleAddClass">新增分类体系</el-button>
               </div>
               <div class="table-panel choose-panel">
@@ -68,7 +68,7 @@
                     label="操作"
                     min-width="150">
                     <template slot-scope="scope">
-                      <el-button @click="editClass(scope.row)" type="primary" size="small">编辑</el-button>
+                      <el-button @click="handleEditClass(scope.row)" type="primary" size="small">编辑</el-button>
                       <!--            <el-button @click="handleClone(scope.row)" type="primary" size="small">克隆</el-button>-->
                       <!--            <el-button @click="handleFreeze(scope.row)" type="primary" size="small">冻结</el-button>-->
                       <el-button @click="handleDetail(scope.row)" type="primary " size="small">明细</el-button>
@@ -117,7 +117,7 @@
                 </el-form>
                 <div slot="footer" class="dialog-footer">
                   <el-button @click="classDialogFormVisible = false">取 消</el-button>
-                  <el-button type="primary" @click="submitForm2">确 定</el-button>
+                  <el-button type="primary" @click="submitClassForm">确 定</el-button>
                 </div>
               </el-dialog>
             </div>
@@ -135,7 +135,7 @@
                 <div class="search">
                   <!--<el-input-->
                   <!--placeholder="请输入内容"-->
-                  <!--v-model="category" @keyup.enter.native="getCatogeries">-->
+                  <!--v-model="category" @keyup.enter.native="getCategoryList">-->
                   <!--<i slot="prefix" class="el-input__icon el-icon-search"></i>-->
                   <!--</el-input>-->
                   <el-input
@@ -144,7 +144,7 @@
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                   </el-input>
                 </div>
-                <el-button type="primary" icon="el-icon-edit" @click="getCatogeries">查询</el-button>
+                <el-button type="primary" icon="el-icon-edit" @click="getCategoryList">查询</el-button>
                 <el-button type="primary" icon="el-icon-edit" @click="handleAddCategory">新增分类</el-button>
               </div>
               <div class="table-panel choose-panel">
@@ -159,8 +159,8 @@
                       <p v-html="item.id"></p>
                       <p v-html="item.label"></p>
                       <p class="td-opt">
-                        <el-button @click="handleClick(item)" type="primary" size="mini">编辑</el-button>
-                        <el-button @click="handledeleteCategory(item)" type="primary " size="mini">删除</el-button>
+                        <el-button @click="handleEditCategory(item)" type="primary" size="mini">编辑</el-button>
+                        <el-button @click="handleDeleteCategory(item)" type="primary " size="mini">删除</el-button>
                       </p>
                     </li>
                   </ul>
@@ -251,6 +251,8 @@ export default {
   },
   data () {
     return {
+      // 创建样本集之前设置的检索条件
+      queryFactor: false,
       showDetail: false,
       id: 0,
       category: '',
@@ -323,13 +325,208 @@ export default {
     }
   },
   methods: {
-    handleClick (row) {
+    init () {
+      this.queryFactor = this.$route.params.queryFactor
+      console.log(this.queryFactor)
+      this.getClassList()
+    },
+    /**
+     * Step1 (Set)
+     */
+    // 设置好样本集名称和描述，准备进入设置分类体系阶段
+    submitSetForm () {
+      this.$refs['ruleForm'].validate((valid) => {
+        if (valid) {
+          this.currentStep = 2
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    /**
+     *  Step2 - 选择分类体系 (Class)
+     */
+    // 开始新增分类体系
+    handleAddClass () {
+      this.classForm = {
+        taonomyName: '',
+        taonomyType: 0,
+        memo: ''
+      }
+      this.formTitle = '新增分类'
+      this.opt = 'add'
+      this.classDialogFormVisible = true
+    },
+    handleEditClass (row) {
+      this.form = row
+      this.formTitle = '修改分类'
+      this.opt = 'edit'
+      this.classDialogFormVisible = true
+    },
+    // 新增或者修改分类体系
+    submitClassForm () {
+      let _this = this
+      this.$refs['classForm'].validate((valid) => {
+        if (valid) {
+          let promise
+          // 分类体系类别为自定义分类体系
+          _this.form.customType = 2
+          if (_this.opt === 'add') {
+            promise = addClassify(_this.classForm)
+          } else {
+            promise = PutClassify(_this.classForm)
+          }
+          promise.then((response) => {
+            const { data } = response
+            if (data && data.code === _this.$config.statusCode) {
+              _this.getClassList()
+            } else {
+              _this.$notify.error({ title: '错误', message: data.message })
+            }
+          }).catch((response) => {
+            // console.log(response)
+          })
+          _this.classDialogFormVisible = false
+        } else {
+          return false
+        }
+      })
+    },
+    // 获取分类体系列表
+    getClassList () {
+      const _this = this
+      let query = {
+        customType: 2,
+        page: 0,
+        size: 500
+      }
+      getClassifyList(query).then((response) => {
+        const { data } = response
+        // debugger
+        if (data && data.code === 200) {
+          _this.classList = []
+          console.log(_this.classList)
+          _this.classList = data.data.list
+          console.log(_this.classList)
+        } else {
+          _this.$notify.error({ title: '错误', message: data.message })
+        }
+      }).catch((response) => {
+        // console.log(response)
+      })
+    },
+    handleClone (row) {
+      //
+    },
+    handleFreeze (row) {
+      //
+    },
+    // 查看分类体系的详情
+    handleDetail (row) {
+      // this.$router.push({ name: 'Category', params: { id: row.id } })
+      this.mainId = row.id
+      this.showDetail = true
+      this.getCategoryList()
+    },
+    /**
+     * 设置分类体系的内部结构 -- 类别 (category)
+     */
+    // 开始新增分类类别
+    handleAddCategory () {
+      this.categoryForm = {
+        name: '',
+        fillColor: '',
+        storkColor: '',
+        icon: '',
+        code: null,
+        mainId: this.mainId,
+        memo: ''
+      }
+      this.formTitle = '新增分类'
+      this.opt = 'add'
+      this.categoryDialogFormVisible = true
+    },
+    handleEditCategory (row) {
       let id = row.id
       const _form = this.record.find((o) => o.id === id)
       this.form = _form
       this.formTitle = '修改分类'
       this.opt = 'edit'
       this.categoryDialogFormVisible = true
+    },
+    // 新增或者修改分类详情
+    submitCategoryForm () {
+      let _this = this
+      this.$refs['categoryForm'].validate((valid) => {
+        if (valid) {
+          let promise
+          if (_this.opt === 'add') {
+            promise = addCategory(_this.categoryForm)
+          } else {
+            promise = _this.putCategory(_this.categoryForm)
+          }
+          promise.then((response) => {
+            debugger
+            if (response && response.data.code === _this.$config.statusCode) {
+              _this.getCategoryList()
+            } else {
+              _this.$notify.error({ title: '错误', message: response.message })
+            }
+          }).catch((response) => {
+            // console.log(response)
+          })
+          _this.categoryDialogFormVisible = false
+        } else {
+          return false
+        }
+      })
+    },
+    // 获取类别列表
+    getCategoryList () {
+      const _this = this
+      let query = {
+        mainId: this.mainId
+      }
+      if (this.category) query.name = this.category
+      getCategoryList(query).then((response) => {
+        if (response && response.data.code === _this.$config.statusCode) {
+          const list = response.data.data.list
+          _this.record = list
+          _this.categoryTable = list.map((o) => {
+            return {
+              id: o.id,
+              label: o.name,
+              parentId: o.parentId
+            }
+          })
+          _this.categoryList = _this.categoryTable.filter((o) => {
+            return isNull(o.parentId)
+          })
+          const tree = _this.categoryTable.filter((o) => {
+            return !isNull(o.parentId)
+          })
+          _this.treeData = generateTree(tree, param)
+          _this.treeNodeKey = []
+        } else {
+          _this.$notify.error({ title: '错误', message: response.message })
+        }
+      }).catch((response) => {
+        // console.log(response)
+      })
+    },
+    // 删除分类类别
+    handleDeleteCategory (row) {
+      const _this = this
+      this.delCategory(row.id).then((response) => {
+        if (response && response.code === _this.$config.statusCode) {
+          _this.getCategoryList()
+        } else {
+          _this.$notify.error({ title: '错误', message: response.message })
+        }
+      }).catch((response) => {
+        // console.log(response)
+      })
     },
     handleDragOver (e) {
       e.preventDefault()
@@ -361,138 +558,6 @@ export default {
       //   return false
       // }
       return true
-    },
-    handleAvatarSuccess (res, file) {
-      const _this = this
-      // let url = URL.createObjectURL(file.raw)
-      let reader = new FileReader()
-      reader.readAsDataURL(file.raw)
-      reader.onload = function (e) {
-        _this.form.icon = e.target.result
-        _this.$set(_this.form, e.target.result, 'icon')
-      }
-    },
-    beforeAvatarUpload (file) {
-      // const isJPG = file.type === 'image/jpeg'
-      const isLt2M = file.size < (50 * 1024)
-
-      // if (!isJPG) {
-      //   this.$message.error('上传头像图片只能是 JPG 格式!')
-      // }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 50K!')
-      }
-      return isLt2M
-    },
-    // addCategory ({ state, commit }, params) {
-    //   return new Promise((resolve, reject) => {
-    //     try {
-    //       addCategory(params).then(res => {
-    //         const data = res.data
-    //         resolve(data)
-    //       }).catch(err => {
-    //         reject(err)
-    //       })
-    //     } catch (error) {
-    //       reject(error)
-    //     }
-    //   })
-    // },
-    // putCategory ({ state, commit }, params) {
-    //   return new Promise((resolve, reject) => {
-    //     try {
-    //       putCategory(params).then(res => {
-    //         const data = res.data
-    //         resolve(data)
-    //       }).catch(err => {
-    //         reject(err)
-    //       })
-    //     } catch (error) {
-    //       reject(error)
-    //     }
-    //   })
-    // },
-    delCategory ({ state, commit }, id) {
-      return new Promise((resolve, reject) => {
-        try {
-          delCategory(id).then(res => {
-            const data = res.data
-            resolve(data)
-          }).catch(err => {
-            reject(err)
-          })
-        } catch (error) {
-          reject(error)
-        }
-      })
-    },
-    submitForm () {
-      this.$refs['ruleForm'].validate((valid) => {
-        if (valid) {
-          this.currentStep = 2
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
-    },
-    submitCategoryForm () {
-      let _this = this
-      this.$refs['categoryForm'].validate((valid) => {
-        if (valid) {
-          let promise
-          if (_this.opt === 'add') {
-            promise = addCategory(_this.categoryForm)
-          } else {
-            promise = _this.putCategory(_this.categoryForm)
-          }
-          promise.then((response) => {
-            debugger
-            if (response && response.data.code === _this.$config.statusCode) {
-              _this.getCatogeries()
-            } else {
-              _this.$notify.error({ title: '错误', message: response.message })
-            }
-          }).catch((response) => {
-            // console.log(response)
-          })
-          _this.categoryDialogFormVisible = false
-        } else {
-          return false
-        }
-      })
-    },
-    getCatogeries () {
-      const _this = this
-      let query = {
-        mainId: this.mainId
-      }
-      if (this.category) query.name = this.category
-      getCategoryList(query).then((response) => {
-        if (response && response.data.code === _this.$config.statusCode) {
-          const list = response.data.data.list
-          _this.record = list
-          _this.categoryTable = list.map((o) => {
-            return {
-              id: o.id,
-              label: o.name,
-              parentId: o.parentId
-            }
-          })
-          _this.categoryList = _this.categoryTable.filter((o) => {
-            return isNull(o.parentId)
-          })
-          const tree = _this.categoryTable.filter((o) => {
-            return !isNull(o.parentId)
-          })
-          _this.treeData = generateTree(tree, param)
-          _this.treeNodeKey = []
-        } else {
-          _this.$notify.error({ title: '错误', message: response.message })
-        }
-      }).catch((response) => {
-        // console.log(response)
-      })
     },
     nodeDragStart (node, event) {
       if (node.data.children.length !== 0) {
@@ -540,133 +605,36 @@ export default {
         // console.log(response)
       })
     },
-    handledeleteCategory (row) {
+    handleAvatarSuccess (res, file) {
       const _this = this
-      this.delCategory(row.id).then((response) => {
-        if (response && response.code === _this.$config.statusCode) {
-          _this.getCatogeries()
-        } else {
-          _this.$notify.error({ title: '错误', message: response.message })
-        }
-      }).catch((response) => {
-        // console.log(response)
-      })
-    },
-    handleAddCategory () {
-      this.categoryForm = {
-        name: '',
-        fillColor: '',
-        storkColor: '',
-        icon: '',
-        code: null,
-        mainId: this.mainId,
-        memo: ''
+      // let url = URL.createObjectURL(file.raw)
+      let reader = new FileReader()
+      reader.readAsDataURL(file.raw)
+      reader.onload = function (e) {
+        _this.form.icon = e.target.result
+        _this.$set(_this.form, e.target.result, 'icon')
       }
-      this.formTitle = '新增分类'
-      this.opt = 'add'
-      this.categoryDialogFormVisible = true
     },
-    init () {
-      this.getClassRecord()
-    },
-    getClassRecord () {
-      const _this = this
-      let query = {
-        customType: 2,
-        page: 0,
-        size: 500
+    beforeAvatarUpload (file) {
+      // const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size < (50 * 1024)
+
+      // if (!isJPG) {
+      //   this.$message.error('上传头像图片只能是 JPG 格式!')
+      // }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 50K!')
       }
-      getClassifyList(query).then((response) => {
-        const { data } = response
-        // debugger
-        if (data && data.code === 200) {
-          _this.classList = []
-          console.log(_this.classList)
-          _this.classList = data.data.list
-          console.log(_this.classList)
-        } else {
-          _this.$notify.error({ title: '错误', message: data.message })
-        }
-      }).catch((response) => {
-        // console.log(response)
-      })
+      return isLt2M
     },
-    editClass (row) {
-      this.form = row
-      this.formTitle = '修改分类'
-      this.opt = 'edit'
-      this.classDialogFormVisible = true
-    },
-    handleClone (row) {
-      //
-    },
-    handleFreeze (row) {
-      //
-    },
-    handleAddClass () {
-      this.classForm = {
-        taonomyName: '',
-        taonomyType: 0,
-        memo: ''
-      }
-      this.formTitle = '新增分类'
-      this.opt = 'add'
-      this.classDialogFormVisible = true
-    },
-    handleDetail (row) {
-      // this.$router.push({ name: 'Category', params: { id: row.id } })
-      this.mainId = row.id
-      this.showDetail = true
-      this.getCatogeries()
-    },
-    handledelete2 (row) {
-      const _this = this
-      this.delCategory(row.id).then((response) => {
-        const { data } = response
-        if (data && data.code === _this.$config.statusCode) {
-          _this.getClassRecord()
-        } else {
-          _this.$notify.error({ title: '错误', message: data.message })
-        }
-      }).catch((response) => {
-        // console.log(response)
-      })
-    },
-    submitForm2 () {
-      let _this = this
-      this.$refs['classForm'].validate((valid) => {
-        if (valid) {
-          let promise
-          // 分类体系类别为自定义分类体系
-          _this.form.customType = 2
-          if (_this.opt === 'add') {
-            promise = addClassify(_this.classForm)
-          } else {
-            promise = PutClassify(_this.classForm)
-          }
-          promise.then((response) => {
-            const { data } = response
-            if (data && data.code === _this.$config.statusCode) {
-              _this.getClassRecord()
-            } else {
-              _this.$notify.error({ title: '错误', message: data.message })
-            }
-          }).catch((response) => {
-            // console.log(response)
-          })
-          _this.classDialogFormVisible = false
-        } else {
-          return false
-        }
-      })
-    }
+
   }
 }
 </script>
 
 <style lang="scss">
-@import "training";
-@import "layout";
+@import "createSet";
+@import "../layout";
 </style>
 <style lang="css">
   .category .category-list {

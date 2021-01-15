@@ -70,7 +70,7 @@ export default {
       // todo
       return 'fa-bell'
     },
-    handleClick (item) {
+    handleEditCategory (item) {
       const _this = this
       // let pattern = /\d+/g
       let id = item.foid
